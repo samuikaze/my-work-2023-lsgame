@@ -1,0 +1,59 @@
+<div class="container-fluid">
+  <div class="row">
+    <!-- 尚未準備完成 -->
+    <div class="col-12" *ngIf="!loaded">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body text-center h3">
+          <span class="spinner-grow spinner-grow" role="status" aria-hidden="true"></span>&nbsp;
+          <span class="card-title fw-bold h2">取得消息一覽中 ...</span>
+        </div>
+      </div>
+    </div>
+    <!-- 準備完成，無資料 -->
+    <div class="col-12" *ngIf="loaded && newsList.length == 0">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body">
+          <h5 class="card-title text-center fw-bold h2">此頁目前沒有可以顯示的消息</h5>
+        </div>
+      </div>
+    </div>
+    <!-- 準備完成，有資料 -->
+    <div class="col-12" *ngIf="loaded && newsList.length > 0">
+      <table class="table table-hover table-bordered">
+        <thead>
+          <tr>
+            <th class="table-header">類型</th>
+            <th class="table-header">標題</th>
+            <th class="table-header">發佈時間</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let news of newsList">
+            <td>{{ news.type }}</td>
+            <td><a [routerLink]="composeNewsDetailUrl(news.id)" class="text-decoration-none">{{ news.title }}</a></td>
+            <td>{{ news.created_at | date: "yyyy-MM-dd HH:mm:ss" }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <nav class="d-flex justify-content-center" aria-label="Page navigation example">
+        <ul class="pagination">
+          <li class="page-item" [class.disabled]="page == 1">
+            <a class="page-link" aria-label="Previous" (click)="setPage(page - 1)">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          <li class="page-item" *ngFor="let pg of [].constructor(totalPages); let i = index">
+            <a class="page-link" [class.active]="page == (i + 1)" (click)="setPage(i + 1)">{{ i + 1 }}</a>
+          </li>
+          <li class="page-item" [class.disabled]="page >= totalPages">
+            <a class="page-link" aria-label="Next" (click)="setPage(page + 1)">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>

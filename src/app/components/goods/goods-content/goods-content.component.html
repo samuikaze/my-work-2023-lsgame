@@ -1,0 +1,129 @@
+<div class="container-fluid">
+  <!-- 尚未準備完成 -->
+  <div class="row" *ngIf="!loaded">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body text-center h3">
+          <span class="spinner-grow spinner-grow" role="status" aria-hidden="true"></span>&nbsp;
+          <span class="card-title fw-bold h2">取得商品清單中 ...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 準備完成，無資料 -->
+  <div class="row" *ngIf="loaded && good === undefined">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body">
+          <h5 class="card-title text-center fw-bold h2">找不到該商品</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 準備完成，有資料 -->
+  <div class="row" *ngIf="loaded && good !== undefined">
+    <a class="text-decoration-none" routerLink="/goods/cart">
+      <div class="d-grid gap-0 d-md-flex justify-content-md-end">
+        <div class="alert alert-warning col-2 text-end" role="alert">
+          <span class="fs-3 fw-bold">NT$ {{ cartPrice }}  <i class="bi bi-cart-fill"></i></span><br />
+          <span class="fs-6">檢視購物車項目</span>
+        </div>
+      </div>
+    </a>
+    <div class="col-4 mt-3">
+      <div class="card">
+        <!-- 商品圖 -->
+        <img
+          [src]="composeGoodImagePath('default.jpg')"
+          class="card-img-top"
+          alt="商品圖"
+          (click)="openLightbox($event)"
+        >
+      </div>
+    </div>
+    <!-- 商品說明 -->
+    <div class="col-8 mt-3">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title h2">{{ good.name }}</h5>
+          <div>
+            <h5 class="fee">
+              NT <span>{{ good.price }}</span>
+            </h5>
+            <h5 class="quantity">
+              剩餘 <span>{{ good.quantity }}</span>
+            </h5>
+          </div>
+          <div class="card-text">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <strong>注意！</strong> 賣家若要求您「使用LINE帳號私下聯絡或轉帳匯款」是常見的詐騙手法
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+              符合消費者保護法所定義企業經營者之賣家，應遵守消費者保護法第19條之規範。買家檢視商品時，應維持商品之原狀，以免影響退款權益。
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <p [innerHtml]="good.description">USB 傳輸線，2.0</p>
+          </div>
+          <div class="row mt-3">
+            <div class="col-6">
+              <table class="table">
+                <tbody>
+                  <tr>
+                    <td rowspan="4" class="align-middle casher-method">接受付款方式</td>
+                    <td>信用卡</td>
+                  </tr>
+                  <tr>
+                    <td>超商取貨<br>（須事先付款）</td>
+                  </tr>
+                  <tr>
+                    <td>ATM 轉帳</td>
+                  </tr>
+                  <tr>
+                    <td>超商取貨付款</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col-6">
+              <table class="table">
+                <tbody>
+                  <tr>
+                    <td rowspan="4" class="align-middle delivary-method">運送方式</td>
+                    <td>超商取貨付款</td>
+                  </tr>
+                  <tr>
+                    <td>超商取貨<br>（須事先付款）</td>
+                  </tr>
+                  <tr>
+                    <td>郵寄／貨運</td>
+                  </tr>
+                  <tr>
+                    <td>郵局取貨</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="d-grid gap-2">
+            <button
+              class="btn btn-lg btn-primary"
+              (click)="addToCart(good, 1)"
+              [disabled]="addableToCart()"
+            >
+              加入購物車
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12 text-center mt-3">
+      <a routerLink="/" class="btn btn-dark m-1">常見問題</a>
+      <a href="" class="btn btn-info m-1" routerLink="/goods">返回周邊商品一覽</a>
+    </div>
+  </div>
+</div>

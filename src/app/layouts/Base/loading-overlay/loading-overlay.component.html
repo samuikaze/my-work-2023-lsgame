@@ -1,0 +1,12 @@
+<div class="base-overlay" [class]="{ show: show, hide: !show }">
+  <div class="virtual-overlay" [class]="{ show: show, hide: !show }">
+    <div class="card">
+      <div class="card-header fw-bold h4">系統訊息</div>
+      <div class="card-body text-center h3">
+        <span class="spinner-grow spinner-grow" role="status" aria-hidden="true"></span>&nbsp;
+        <span class="card-title fw-bold h2">取得消息一覽中 ...</span>
+      </div>
+    </div>
+  </div>
+  <div class="overlay" [class]="{ 'overlay-show': show, 'overlay-hide': !show }"></div>
+</div>

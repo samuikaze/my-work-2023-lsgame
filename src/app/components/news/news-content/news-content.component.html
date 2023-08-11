@@ -1,0 +1,38 @@
+<div class="container-fluid">
+  <div class="row">
+    <!-- 未取得完成 -->
+    <div class="col-md-10 mt-3" style="float:unset; margin: 0 auto;" *ngIf="!loaded">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body text-center h3">
+          <span class="spinner-grow spinner-grow" role="status" aria-hidden="true"></span>&nbsp;
+          <span class="card-title fw-bold h2">取得消息資料中 ...</span>
+        </div>
+      </div>
+    </div>
+    <!-- 已取得完成，若無資料 -->
+    <div class="col-md-10 mt-3" style="float:unset; margin: 0 auto;" *ngIf="loaded && news === undefined">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body">
+          <h5 class="card-title text-center fw-bold h2">找不到該消息</h5>
+        </div>
+      </div>
+    </div>
+    <!-- 已取得完成，若有資料 -->
+    <div class="col-md-10 mt-3" style="float:unset; margin: 0 auto;" *ngIf="loaded && news !== undefined">
+      <div class="news-view">
+        <div class="news-time">
+          {{ news.created_at | date: "yyyy-MM-dd HH:mm:ss" }}&nbsp;・&nbsp;
+          <span class="badge bg-primary">{{ news.type }}</span>
+        </div>
+        <h2 class="news-title">{{ news.title }}</h2>
+      </div>
+      <hr />
+      <div class="news-content" [innerHtml]="news.content"></div>
+      <div class="container-fluid text-center" style="margin: 3em 0 0 0;">
+        <a routerLink="/news" class="btn btn-lg btn-success">返回消息列表</a>
+      </div>
+    </div>
+  </div>
+</div>

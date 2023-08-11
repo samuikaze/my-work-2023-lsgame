@@ -1,0 +1,104 @@
+<div class="container-fluid p-5 pt-0">
+  <div class="row">
+    <div class="col-12">
+      <div class="mb-3">
+        <div class="dropdown text-end">
+          <button
+            class="btn btn-secondary dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            disabled
+          >
+            全部主題
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">綜合討論</a></li>
+            <li><a class="dropdown-item" href="#">板務公告</a></li>
+            <li><a class="dropdown-item" href="#">攻略心得</a></li>
+            <li><a class="dropdown-item" href="#">同人創作</a></li>
+          </ul>
+          &nbsp;
+          <a
+            title="請先登入"
+            class="btn btn-success"
+            [class.disabled]="!checkAuthenticateState()"
+            [routerLink]="composeNewPostUrl()"
+          >
+            張貼文章
+          </a>
+        </div>
+      </div>
+      <!-- 尚未準備完成 -->
+      <div class="col-12" *ngIf="!loaded">
+        <div class="card">
+          <div class="card-header fw-bold h4">系統訊息</div>
+          <div class="card-body text-center h3">
+            <span class="spinner-grow spinner-grow" role="status" aria-hidden="true"></span>&nbsp;
+            <span class="card-title fw-bold h2">取得文章清單中 ...</span>
+          </div>
+        </div>
+      </div>
+      <!-- 準備完成，無資料 -->
+      <div class="col-12" *ngIf="loaded && posts.length == 0">
+        <div class="card">
+          <div class="card-header fw-bold h4">系統訊息</div>
+          <div class="card-body">
+            <h5 class="card-title text-center fw-bold h2">目前沒有可以顯示的文章</h5>
+          </div>
+        </div>
+      </div>
+      <!-- 準備完成，有資料 -->
+      <div class="mt-3"  *ngIf="loaded && posts.length > 0">
+        <table class="table table-hover" style="vertical-align: middle;">
+          <thead>
+            <tr class="info bg-table-header">
+              <th class="post-nums column-width">回文數</th>
+              <th class="post-title column-width">文章標題</th>
+              <th class="post-time column-width">貼文時間</th>
+              <th class="post-time column-width last-operatime">最後操作時間</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let post of posts">
+              <td class="post-nums text-left">{{ post.replies_quantity }}</td>
+              <td class="post-title">
+                <a class="text-decoration-none" [routerLink]="composePostUrl(post.id)">
+                  <span class="badge rounded-pill text-bg-warning">{{ post.category }}</span>
+                  {{ post.title }}
+                </a>
+              </td>
+              <td class="post-time">
+                {{ post.post_user }}<br />
+                {{ post.created_at | date: "yyyy-MM-dd hh:mm:ss" }}
+              </td>
+              <!-- 文章狀態只要是已被刪除就通通顯示為刪除 -->
+              <td class="post-time last-operatime">
+                <span style="color: gray;" *ngIf="post.last_operation_at === null">目前尚無回覆</span>
+                {{ post.last_operation_at }}
+              </td>
+              <!-- <td class="post-time last-operatime"><span style="color: gray;">文章已被刪除</span></td> -->
+            </tr>
+          </tbody>
+        </table>
+        <nav class="d-flex justify-content-center" aria-label="Page navigation example">
+          <ul class="pagination">
+            <li class="page-item" [class.disabled]="page == 1">
+              <a class="page-link" aria-label="Previous" (click)="setPage(page - 1)">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            <li class="page-item" *ngFor="let pg of [].constructor(totalPages); let i = index">
+              <a class="page-link" [class.active]="page == (i + 1)" (click)="setPage(i + 1)">{{ i + 1 }}</a>
+            </li>
+            <li class="page-item" [class.disabled]="page >= totalPages">
+              <a class="page-link" aria-label="Next" (click)="setPage(page + 1)">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>

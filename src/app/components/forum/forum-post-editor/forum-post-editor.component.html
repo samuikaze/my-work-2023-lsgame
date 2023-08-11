@@ -1,0 +1,55 @@
+<div class="container">
+  <div class="row">
+    <!-- 尚未準備完成 -->
+    <div class="col-12" *ngIf="!getLoaded()">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body text-center h3">
+          <span class="spinner-grow spinner-grow" role="status" aria-hidden="true"></span>&nbsp;
+          <span class="card-title fw-bold h2">取得必要資料中 ...</span>
+        </div>
+      </div>
+    </div>
+    <!-- 準備完成 -->
+    <div class="col-12" *ngIf="getLoaded()">
+      <div class="mb-3">
+        <label class="form-label">文章標題</label>
+        <input
+          type="text"
+          class="form-control"
+          name="post-title"
+          placeholder="請輸入文章標題，此為必填項"
+          [(ngModel)]="postModel.title"
+        />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">文章分類</label>
+        <select
+          [(ngModel)]="postModel.category"
+          name="post-category"
+          class="form-select"
+          aria-label="Default select example"
+        >
+          <option [value]="undefined" disabled>-- 請選擇文章種類 --</option>
+          <option
+            *ngFor="let category of categories"
+            [value]="category.id"
+          >
+            {{ category.name }}
+          </option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">文章內容</label>
+        <ckeditor [(ngModel)]="postModel.content"></ckeditor>
+      </div>
+      <div class="d-grid gap-2 d-md-flex justify-content-center">
+        <button type="button" class="btn btn-success" (click)="submitPost()" [disabled]="!isPostSubmitable()">
+          <span *ngIf="fireSubmitPost" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          {{ fireSubmitPost ? "送出中..." : "送出" }}
+        </button>
+        <button type="button" class="btn btn-info" (click)="backToBoard()">取消</button>
+      </div>
+    </div>
+  </div>
+</div>

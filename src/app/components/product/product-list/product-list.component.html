@@ -1,0 +1,66 @@
+<div class="container-fluid">
+  <div class="row">
+    <!-- 尚未準備完成 -->
+    <div class="col-12" *ngIf="!loaded">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body text-center h3">
+          <span class="spinner-grow spinner-grow" role="status" aria-hidden="true"></span>&nbsp;
+          <span class="card-title fw-bold h2">取得作品一覽中 ...</span>
+        </div>
+      </div>
+    </div>
+    <!-- 準備完成，無資料 -->
+    <div class="col-12" *ngIf="loaded && productsList.length == 0">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body">
+          <h5 class="card-title text-center fw-bold h2">目前沒有可以顯示的作品</h5>
+        </div>
+      </div>
+    </div>
+    <!-- 準備完成，有資料 -->
+    <div class="col-12" *ngIf="loaded && productsList.length > 0">
+      <div class="card col-6 p-0 m-2" *ngFor="let product of productsList">
+        <div class="card-body p-2">
+          <div class="prod-lists thumbnail">
+            <img
+              [src]="'/assets/images/products/' + product.visual_image"
+              data-lightbox="image-1"
+              data-title="My caption"
+              (click)="openLightbox($event)"
+            >
+            <div class="prod-text">
+              <h3 class="f-left prod-title">{{ product.title }}</h3>
+              <div class="f-left">
+                <p [innerHtml]="product.description"></p>
+                <hr class="f-left prod-divide" />
+                <div class="col-md-6 col-xs-12 pull-left p-0">
+                  <p>類型：{{ product.type }}</p>
+                </div>
+                <div class="col-md-6 col-xs-12 fRight p-0">
+                  <p>平台：{{ product.platforms.join('、') }}</p>
+                </div>
+                <hr class="f-left prod-divide" />
+                <div class="col-md-12 col-xs-12 relDate p-0">
+                  <p *ngIf="product.release_at == null">發售日：<span style="color: gray;">未定</span></p>
+                  <p *ngIf="product.release_at != null">發售日：{{ product.release_at | date: "yyyy / MM / dd" }}</p>
+                </div>
+              </div>
+              <div class="text-left go-prod">
+                <a
+                  [href]="product.product_url"
+                  class="btn btn-block btn-success"
+                  [class.disabled]="product.product_url == null"
+                >
+                  前往頁面
+                </a>
+              </div>
+            </div>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

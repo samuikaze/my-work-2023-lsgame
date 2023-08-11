@@ -1,0 +1,62 @@
+<div class="container-fluid">
+  <div class="row">
+    <!-- 尚未準備完成 -->
+    <div class="col-12" *ngIf="!loaded">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body text-center h3">
+          <span class="spinner-grow spinner-grow" role="status" aria-hidden="true"></span>&nbsp;
+          <span class="card-title fw-bold h2">取得商品清單中 ...</span>
+        </div>
+      </div>
+    </div>
+    <!-- 準備完成，無資料 -->
+    <div class="col-12" *ngIf="loaded && goods.length == 0">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body">
+          <h5 class="card-title text-center fw-bold h2">目前沒有可以顯示的商品</h5>
+        </div>
+      </div>
+    </div>
+    <!-- 準備完成，有資料 -->
+    <div class="col-12 row" *ngIf="loaded && goods.length > 0">
+        <div class="d-grid gap-0 d-md-flex justify-content-md-end">
+            <a
+              class="alert alert-warning col-2 text-end text-decoration-none no-hover"
+              role="alert"
+              routerLink="/goods/cart"
+            >
+              <span class="fs-3 fw-bold">NT$ {{ cartPrice }}  <i class="bi bi-cart-fill"></i></span><br />
+              <span class="fs-6">檢視購物車項目</span>
+            </a>
+        </div>
+      <div class="col-4" *ngFor="let good of goods">
+        <div class="card">
+          <a [routerLink]="composeDetailUrl(good.id)">
+            <img
+              [src]="composePreviewImageUrl(good.preview_image)"
+              class="card-img-top"
+              alt="商品圖"
+            />
+          </a>
+          <div class="card-body">
+            <div class="card-title goods-title h4">
+              {{ good.name }}
+              <h5 class="fee">
+                NT <span>{{ good.price }}</span>
+              </h5>
+            </div>
+            <p class="card-text" [innerHtml]="good.description"></p>
+            <div class="text-center">
+              <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                <a class="btn btn-success" [routerLink]="composeDetailUrl(good.id)">週邊詳細</a>
+                <button type="button" class="btn btn-info" (click)="addToCart(good, 1)">加入購物車</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

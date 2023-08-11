@@ -1,0 +1,113 @@
+<div class="container">
+  <div class="row">
+    <div class="col-8">
+      <!-- 尚未準備完成 -->
+      <div class="card" *ngIf="!loaded">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body text-center h3">
+          <span class="spinner-grow spinner-grow" role="status" aria-hidden="true"></span>&nbsp;
+          <span class="card-title fw-bold h2">取得商品清單中 ...</span>
+        </div>
+      </div>
+      <!-- 準備完成，無資料 -->
+      <div class="card" *ngIf="loaded && goods.length == 0">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body">
+          <h5 class="card-title text-center fw-bold h2">目前沒有可以顯示的商品</h5>
+        </div>
+      </div>
+      <!-- 一個購物車項目 -->
+      <div *ngFor="let good of goods">
+        <div class="cart-header">
+          <div class="cart-sec simpleCart_shelfItem row">
+            <div class="cart-item cyc col-3">
+              <img
+                [src]="composeImagePath(good.image)"
+                (click)="openLightbox($event)"
+                class="img-responsive cartitemimage"
+              />
+            </div>
+            <div class="cart-item-info col-9">
+              <div class="row h3">
+                <div class="col-11">
+                  <div>
+                    <a
+                      [routerLink]="composeGoodDetailUrl(good.id)"
+                      class="cart-item-title"
+                    >
+                      {{ good.name }}
+                    </a>
+                  </div>
+                  <div
+                    [innerHtml]="good.description"
+                    class="cart-description"
+                  >
+                  </div>
+                </div>
+                <div class="col-1 text-end pr-5">
+                  <i
+                    class="bi bi-trash3-fill text-danger"
+                    title="從購物車移除"
+                    (click)="removeGoodFromCart(good.id)"
+                  >
+                  </i>
+                </div>
+              </div>
+              <div class="alert alert-warning row" role="alert">
+                <div class="col-8">數量：
+                  <input
+                    type="number"
+                    [(ngModel)]="good.quantity"
+                    (change)="changeQuantity(good.id)"
+                    class="item-quantity"
+                    min="0"
+                  />
+                  &nbsp;・&nbsp;
+                  單價：NT$ <span>{{ good.prices }}</span>
+                </div>
+                <div class="col-4 text-end fw-bold">
+                  小計：NT$ {{ good.prices * good.quantity }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr class="cartitem-margin" />
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="d-grid gap-2">
+        <div class="card">
+          <div class="card-header">
+            總計 (不含運費)
+          </div>
+          <div class="card-body text-center fw-bold h3">
+            NT$ {{ getTotalPrices() }}
+          </div>
+        </div>
+        <a class="btn btn-primary" type="button" routerLink="/goods">繼續選購</a>
+        <div *ngIf="checkAuthenticateState()" class="col-12 d-grid gap-2">
+          <button type="button" class="btn btn-success" [disabled]="checkoutBtnDisabled()">立刻下單</button>
+          <hr />
+          <button
+            type="button"
+            class="btn btn-info"
+            (click)="saveCart()"
+            [disabled]="checkoutBtnDisabled()"
+          >
+            保存購物車
+          </button>
+        </div>
+        <hr />
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="resetCart()"
+          [disabled]="checkoutBtnDisabled()"
+        >
+          重置購物車
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

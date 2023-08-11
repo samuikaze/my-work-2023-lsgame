@@ -1,0 +1,129 @@
+<div class="container-fluid">
+  <div class="row">
+    <!-- 尚未準備完成 -->
+    <div class="col-12" *ngIf="!getLoaded()">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body text-center h3">
+          <span class="spinner-grow spinner-grow" role="status" aria-hidden="true"></span>&nbsp;
+          <span class="card-title fw-bold h2">取得文章清單中 ...</span>
+        </div>
+      </div>
+    </div>
+    <!-- 準備完成，無資料 -->
+    <div class="col-12" *ngIf="getLoaded() && post === undefined">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body">
+          <h5 class="card-title text-center fw-bold h2">目前沒有可以顯示的文章</h5>
+        </div>
+      </div>
+    </div>
+    <!-- 準備完成，有資料 -->
+    <div class="col-12"  *ngIf="getLoaded() && post !== undefined">
+      <!-- 按鈕區 -->
+      <div class="p-3 pt-0">
+        <div class="text-end">
+          &nbsp;
+          <a
+            title="請先登入"
+            class="btn btn-success"
+            [class.disabled]="!checkAuthenticateState()"
+            [routerLink]="composeReplyUrl()"
+          >回覆此文章</a>
+        </div>
+      </div>
+      <!-- 文章 -->
+      <div class="row post-outline">
+        <!-- 張貼者資訊 -->
+        <div class="col-2 post-author-info p-3">
+          <img
+            class="user-avator"
+            src="/assets/images/users/avators/exampleAvator.jpg"
+            alt="頭像"
+          />
+          <p>
+            <span class="h4 fw-bold">超級管理員</span><br />
+            <span class="h6">admin</span>
+          </p>
+        </div>
+        <!-- 文章內容 -->
+        <div class="col-10">
+          <div class="post-info row">
+            <div class="col-6">
+              #0
+              | {{ post.created_at | date: "yyyy-MM-dd HH:mm:ss" }}
+              <span *ngIf="post.updated_at != null">| 編輯於 {{ post.updated_at | date: "yyyy-MM-dd HH:mm:ss" }}</span>
+            </div>
+            <div class="col-6 text-end" *ngIf="isEditable(post.post_user_id)">
+              <a
+                [routerLink]="composePostEditUrl()"
+                class="text-white text-decoration-none"
+              >
+                編輯
+              </a>
+              | 刪除
+              <!-- | 大 中 小 -->
+            </div>
+          </div>
+          <div class="col-12" [innerHtml]="post.content"></div>
+        </div>
+      </div>
+      <!-- 回應 -->
+      <div class="col-12" *ngIf="getLoaded() && replies.length > 0">
+        <div class="row post-outline" *ngFor="let reply of replies; let i = index">
+          <!-- 張貼者資訊 -->
+          <div class="col-2 post-author-info p-3">
+            <img
+              class="user-avator"
+              src="/assets/images/users/avators/exampleAvator.jpg"
+              alt="頭像"
+            />
+            <p>
+              <span class="h4 fw-bold">超級管理員</span><br />
+              <span class="h6">admin</span>
+            </p>
+          </div>
+          <!-- 文章內容 -->
+          <div class="col-10">
+            <div class="post-info row">
+              <div class="col-6">
+                #{{ composeReplyId(i) }}
+                | {{ reply.created_at | date: "yyyy-MM-dd HH:mm:ss" }}
+                <span *ngIf="reply.updated_at != null">| 編輯於 {{ reply.updated_at | date: "yyyy-MM-dd HH:mm:ss" }}</span>
+              </div>
+              <div class="col-6 text-end" *ngIf="isEditable(reply.post_user_id)">
+                <a
+                  [routerLink]="composeReplyEditUrl(reply.id)"
+                  class="text-white text-decoration-none"
+                >
+                  編輯
+                </a>
+                | 刪除
+                <!-- | 大 中 小 -->
+              </div>
+            </div>
+            <div class="col-12" [innerHtml]="reply.content"></div>
+          </div>
+        </div>
+      </div>
+      <nav class="d-flex justify-content-center" aria-label="Page navigation example">
+        <ul class="pagination">
+          <li class="page-item" [class.disabled]="page == 1">
+            <a class="page-link" aria-label="Previous" (click)="setPage(page - 1)">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          <li class="page-item" *ngFor="let pg of [].constructor(totalPages); let i = index">
+            <a class="page-link" [class.active]="page == (i + 1)" (click)="setPage(i + 1)">{{ i + 1 }}</a>
+          </li>
+          <li class="page-item" [class.disabled]="page >= totalPages">
+            <a class="page-link" aria-label="Next" (click)="setPage(page + 1)">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>

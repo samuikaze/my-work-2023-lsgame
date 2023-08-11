@@ -1,0 +1,49 @@
+<div class="container-fluid">
+  <!-- 尚未準備完成 -->
+  <div class="row">
+    <div class="col-12" *ngIf="!loaded">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body text-center h3">
+          <span class="spinner-grow spinner-grow" role="status" aria-hidden="true"></span>&nbsp;
+          <span class="card-title fw-bold h2">取得討論板清單中 ...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 準備完成，無資料 -->
+  <div class="row">
+    <div class="col-12" *ngIf="loaded && boards.length == 0">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body">
+          <h5 class="card-title text-center fw-bold h2">目前沒有可以顯示的討論板</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 準備完成，有資料 -->
+  <div class="row" *ngIf="loaded && boards.length > 0">
+    <div class="col-md-4 courses-info" *ngFor="let board of boards">
+      <div class="card">
+        <div class="card-body">
+          <div>
+            <a [href]="composeBoardPath(board.id)">
+              <img class="board-image" [src]="composeImagePath(board.board_image)" />
+            </a>
+            <div class="caption mt-2">
+              <h3 class="pull-left">{{ board.name }} </h3>
+              <div class="fLeft" [innerHtml]="board.description"></div>
+              <div class="clearfix"></div>
+              <div class="text-center">
+                <div class="d-grid gap-2">
+                  <a [routerLink]="composeBoardPath(board.id)" class="btn btn-block btn-warning">進入討論板</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
