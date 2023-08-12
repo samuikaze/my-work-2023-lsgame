@@ -6,11 +6,14 @@ import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrum
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
 import { environment } from 'src/environments/environment';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-product-list',
-  templateUrl: './product-list.component.html',
-  styleUrls: ['./product-list.component.sass']
+    selector: 'app-product-list',
+    templateUrl: './product-list.component.html',
+    styleUrls: ['./product-list.component.sass'],
+    standalone: true,
+    imports: [NgIf, NgFor, DatePipe]
 })
 export class ProductListComponent implements OnInit {
 

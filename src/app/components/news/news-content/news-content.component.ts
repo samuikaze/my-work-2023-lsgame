@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, Host, Inject, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Breadcrumb } from 'src/app/abstracts/common';
 import { BaseResponse } from 'src/app/abstracts/http-client';
 import { News } from 'src/app/abstracts/news';
@@ -9,12 +9,15 @@ import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
 import { environment } from 'src/environments/environment';
 import { NewsListComponent } from '../news-list/news-list.component';
+import { NgIf, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-news-content',
-  templateUrl: './news-content.component.html',
-  styleUrls: ['./news-content.component.sass'],
-  providers: [ NewsListComponent ]
+    selector: 'app-news-content',
+    templateUrl: './news-content.component.html',
+    styleUrls: ['./news-content.component.sass'],
+    providers: [NewsListComponent],
+    standalone: true,
+    imports: [NgIf, RouterLink, DatePipe]
 })
 export class NewsContentComponent implements OnInit {
 

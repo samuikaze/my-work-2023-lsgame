@@ -6,11 +6,15 @@ import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrum
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
 import { environment } from 'src/environments/environment';
+import { RouterLink } from '@angular/router';
+import { NgIf, NgFor } from '@angular/common';
 
 @Component({
-  selector: 'app-forum-board-list',
-  templateUrl: './forum-board-list.component.html',
-  styleUrls: ['./forum-board-list.component.sass']
+    selector: 'app-forum-board-list',
+    templateUrl: './forum-board-list.component.html',
+    styleUrls: ['./forum-board-list.component.sass'],
+    standalone: true,
+    imports: [NgIf, NgFor, RouterLink]
 })
 export class ForumBoardListComponent implements OnInit {
 

@@ -7,11 +7,15 @@ import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrum
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
 import { environment } from 'src/environments/environment';
+import { RouterLink } from '@angular/router';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-news-list',
-  templateUrl: './news-list.component.html',
-  styleUrls: ['./news-list.component.sass']
+    selector: 'app-news-list',
+    templateUrl: './news-list.component.html',
+    styleUrls: ['./news-list.component.sass'],
+    standalone: true,
+    imports: [NgIf, NgFor, RouterLink, DatePipe]
 })
 export class NewsListComponent implements OnInit {
 

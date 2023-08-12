@@ -8,8 +8,8 @@ describe('ForumReplyEditorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ForumReplyEditorComponent ]
-    })
+    imports: [ForumReplyEditorComponent]
+})
     .compileComponents();
   });
 

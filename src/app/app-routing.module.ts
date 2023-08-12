@@ -14,35 +14,35 @@ const routes: Routes = [
       },
       {
         path: "news",
-        loadChildren: () => import("./components/news/news.module").then(m => m.NewsModule)
+        loadChildren: () => import("./components/news/news-routing.module").then(m => m.NewsRoutingModule)
       },
       {
         path: "products",
-        loadChildren: () => import("./components/product/product-list/product-list.module").then(m => m.ProductListModule)
+        loadChildren: () => import("./components/product/product-list/product-list-routing.module").then(m => m.ProductListRoutingModule)
       },
       {
         path: "goods",
-        loadChildren: () => import("./components/goods/goods.module").then(m => m.GoodsModule)
+        loadChildren: () => import("./components/goods/goods-routing.module").then(m => m.GoodsRoutingModule)
       },
       {
         path: "forums",
-        loadChildren: () => import("./components/forum/forum.module").then(m => m.ForumModule)
+        loadChildren: () => import("./components/forum/forum-routing.module").then(m => m.ForumRoutingModule)
       },
       {
         path: "about",
-        loadChildren: () => import("./components/about/about.module").then(m => m.AboutModule)
+        loadChildren: () => import("./components/about/about-routing.module").then(m => m.AboutRoutingModule)
       },
       {
         path: "recruit",
-        loadChildren: () => import("./components/recruit/recruit.module").then(m => m.RecruitModule)
+        loadChildren: () => import("./components/recruit/recruit-routing.module").then(m => m.RecruitRoutingModule)
       },
       {
         path: "faq",
-        loadChildren: () => import("./components/faq/faq.module").then(m => m.FaqModule)
+        loadChildren: () => import("./components/faq/faq-routing.module").then(m => m.FaqRoutingModule)
       },
       {
         path: "contact",
-        loadChildren: () => import("./components/contact/contact.module").then(m => m.ContactModule)
+        loadChildren: () => import("./components/contact/contact-routing.module").then(m => m.ContactRoutingModule)
       },
     ]
   },

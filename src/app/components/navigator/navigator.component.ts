@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { Breadcrumb } from 'src/app/abstracts/common';
 import { BaseResponse } from 'src/app/abstracts/http-client';
 import { SignIn } from 'src/app/abstracts/navigator';
@@ -15,11 +15,15 @@ import { Modals } from 'src/app/abstracts/navigator';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { NavigatorStatuses } from './navigator';
+import { FormsModule } from '@angular/forms';
+import { NgFor, NgIf, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-navigator',
-  templateUrl: './navigator.component.html',
-  styleUrls: ['./navigator.component.sass']
+    selector: 'app-navigator',
+    templateUrl: './navigator.component.html',
+    styleUrls: ['./navigator.component.sass'],
+    standalone: true,
+    imports: [NgFor, NgIf, RouterLink, FormsModule, DatePipe]
 })
 export class NavigatorComponent implements OnInit {
 

@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, Inject, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Breadcrumb } from 'src/app/abstracts/common';
 import { Cart, Good } from 'src/app/abstracts/goods';
 import { BaseResponse } from 'src/app/abstracts/http-client';
@@ -10,12 +10,15 @@ import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
 import { environment } from 'src/environments/environment';
 import { GoodsListComponent } from '../goods-list/goods-list.component';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-goods-content',
-  templateUrl: './goods-content.component.html',
-  styleUrls: ['./goods-content.component.sass'],
-  providers: [ GoodsListComponent ]
+    selector: 'app-goods-content',
+    templateUrl: './goods-content.component.html',
+    styleUrls: ['./goods-content.component.sass'],
+    providers: [GoodsListComponent],
+    standalone: true,
+    imports: [NgIf, RouterLink]
 })
 export class GoodsContentComponent implements OnInit {
 

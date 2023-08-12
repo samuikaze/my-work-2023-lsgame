@@ -4,9 +4,10 @@ import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrum
 import { CommonService } from 'src/app/services/common-service/common.service';
 
 @Component({
-  selector: 'app-about',
-  templateUrl: './about.component.html',
-  styleUrls: ['./about.component.sass']
+    selector: 'app-about',
+    templateUrl: './about.component.html',
+    styleUrls: ['./about.component.sass'],
+    standalone: true
 })
 export class AboutComponent implements OnInit {
 

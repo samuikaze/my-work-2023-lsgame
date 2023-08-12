@@ -11,19 +11,27 @@ import { environment } from 'src/environments/environment';
 import { ForumBoardListComponent } from '../forum-board-list/forum-board-list.component';
 import { ForumPostListComponent } from '../forum-post-list/forum-post-list.component';
 import { ForumPostViewerComponent } from '../forum-post-viewer/forum-post-viewer.component';
+import { FormsModule } from '@angular/forms';
+import { NgIf, NgFor } from '@angular/common';
+import { CKEditorModule } from 'ckeditor4-angular';
 
 @Component({
   selector: 'app-forum-post-editor',
   templateUrl: './forum-post-editor.component.html',
   styleUrls: ['./forum-post-editor.component.sass'],
-  providers: [ ForumBoardListComponent, ForumPostListComponent, ForumPostViewerComponent ]
+  providers: [
+    ForumBoardListComponent,
+    ForumPostListComponent,
+    ForumPostViewerComponent,
+  ],
+  standalone: true,
+  imports: [NgIf, FormsModule, NgFor, CKEditorModule],
 })
 export class ForumPostEditorComponent implements OnInit {
-
   @Input() public postModel: PostEdit = {
-    title: "",
+    title: '',
     category: undefined,
-    content: "",
+    content: '',
   };
   public categories: Category[] = [];
   public boardId?: number;
@@ -32,20 +40,23 @@ export class ForumPostEditorComponent implements OnInit {
   public postLoaded = false;
   public newPost: boolean = true;
   public fireSubmitPost: boolean = false;
-  public breadcrumb: Breadcrumb = { title: "", uri: "" };
+  public breadcrumb: Breadcrumb = { title: '', uri: '' };
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private commonService: CommonService,
     private requestService: RequestService,
     private breadcrumbService: BreadcrumbService,
-    @Inject(ForumBoardListComponent) private forumBoardListComponent: ForumBoardListComponent,
-    @Inject(ForumPostListComponent) private forumPostListComponent: ForumPostListComponent,
-    @Inject(ForumPostViewerComponent) private forumPostViewerComponent: ForumPostViewerComponent
-  ) { }
+    @Inject(ForumBoardListComponent)
+    private forumBoardListComponent: ForumBoardListComponent,
+    @Inject(ForumPostListComponent)
+    private forumPostListComponent: ForumPostListComponent,
+    @Inject(ForumPostViewerComponent)
+    private forumPostViewerComponent: ForumPostViewerComponent
+  ) {}
 
   ngOnInit(): void {
-    this.commonService.setTitle("討論專區");
+    this.commonService.setTitle('討論專區');
     this.preprocessBreadcrumb();
     this.getPostTypes();
   }
@@ -57,16 +68,28 @@ export class ForumPostEditorComponent implements OnInit {
     this.getBoardId();
     this.getPostId();
     if (this.postId !== undefined) {
-      this.breadcrumb = { title: "編輯文章", uri: `/forums/${this.boardId}/post/${this.postId}/edit` };
+      this.breadcrumb = {
+        title: '編輯文章',
+        uri: `/forums/${this.boardId}/post/${this.postId}/edit`,
+      };
     } else {
-      this.breadcrumb = { title: "張貼文章", uri: `/forums/${this.boardId}/post` };
+      this.breadcrumb = {
+        title: '張貼文章',
+        uri: `/forums/${this.boardId}/post`,
+      };
     }
 
-    this.breadcrumbService.setBreadcrumb(this.forumBoardListComponent.breadcrumb);
-    this.breadcrumbService.addBreadcrumb(this.forumPostListComponent.breadcrumb);
+    this.breadcrumbService.setBreadcrumb(
+      this.forumBoardListComponent.breadcrumb
+    );
+    this.breadcrumbService.addBreadcrumb(
+      this.forumPostListComponent.breadcrumb
+    );
 
     if (this.postId !== undefined) {
-      this.breadcrumbService.addBreadcrumb(this.forumPostViewerComponent.breadcrumb);
+      this.breadcrumbService.addBreadcrumb(
+        this.forumPostViewerComponent.breadcrumb
+      );
     }
 
     this.breadcrumbService.addBreadcrumb(this.breadcrumb);
@@ -84,9 +107,9 @@ export class ForumPostEditorComponent implements OnInit {
    * 從 URL 取得討論板 ID
    */
   private getBoardId() {
-    const BOARD_ID = this.route.snapshot.paramMap.get("fid");
+    const BOARD_ID = this.route.snapshot.paramMap.get('fid');
     if (BOARD_ID == null) {
-      throw new Error("討論板 ID 不符合系統規定");
+      throw new Error('討論板 ID 不符合系統規定');
     }
 
     this.boardId = Number(BOARD_ID);
@@ -96,7 +119,7 @@ export class ForumPostEditorComponent implements OnInit {
    * 從 URL 取得文章 ID，若有則會進一步取得文章內容
    */
   private getPostId() {
-    const POST_ID = this.route.snapshot.paramMap.get("pid")
+    const POST_ID = this.route.snapshot.paramMap.get('pid');
     if (POST_ID == null) {
       this.postId = undefined;
       this.newPost = true;
@@ -116,11 +139,10 @@ export class ForumPostEditorComponent implements OnInit {
     this.categories = [];
 
     const URL = `${environment.backendUri}/forums/commons/post/types`;
-    this.requestService.get<BaseResponse<Category[]>>(URL)
-      .subscribe(data => {
-        this.categories = data.data;
-        this.categoriesLoaded = true;
-      });
+    this.requestService.get<BaseResponse<Category[]>>(URL).subscribe((data) => {
+      this.categories = data.data;
+      this.categoriesLoaded = true;
+    });
   }
 
   /**
@@ -129,19 +151,18 @@ export class ForumPostEditorComponent implements OnInit {
   private getPost() {
     this.postLoaded = false;
     this.postModel = {
-      title: "",
+      title: '',
       category: undefined,
-      content: ""
+      content: '',
     };
 
     const URL = `${environment.backendUri}/forums/boards/${this.boardId}/posts/${this.postId}`;
-    this.requestService.get<BaseResponse<Post>>(URL)
-      .subscribe(data => {
-        this.postModel.title = data.data.title;
-        this.postModel.category = data.data.category_id;
-        this.postModel.content = data.data.content;
-        this.postLoaded = true;
-      })
+    this.requestService.get<BaseResponse<Post>>(URL).subscribe((data) => {
+      this.postModel.title = data.data.title;
+      this.postModel.category = data.data.category_id;
+      this.postModel.content = data.data.content;
+      this.postLoaded = true;
+    });
   }
 
   /**
@@ -149,14 +170,14 @@ export class ForumPostEditorComponent implements OnInit {
    */
   public submitPost() {
     if (!this.isPostSubmitable()) {
-      alert("請確認所有欄位是否都有填完");
-      throw new Error("請確認所有欄位是否都有填完");
+      alert('請確認所有欄位是否都有填完');
+      throw new Error('請確認所有欄位是否都有填完');
     }
 
     this.fireSubmitPost = true;
     const POST = this.postModel;
 
-    let url = "";
+    let url = '';
     let client = undefined;
     if (this.postId !== undefined) {
       url = `${environment.backendUri}/forums/boards/${this.boardId}/post/${this.postId}`;
@@ -167,21 +188,21 @@ export class ForumPostEditorComponent implements OnInit {
     }
 
     client.subscribe({
-        next: () => {
-          this.fireSubmitPost = false;
-          this.backToBoard();
-        },
-        error: (errors: HttpErrorResponse) => {
-          console.log(errors);
+      next: () => {
+        this.fireSubmitPost = false;
+        this.backToBoard();
+      },
+      error: (errors: HttpErrorResponse) => {
+        console.log(errors);
 
-          if (errors.status >= 500) {
-            alert("系統發生不可預期的錯誤，請再試一次");
-          }
-
-          alert(errors.error.message);
-          this.fireSubmitPost = false;
+        if (errors.status >= 500) {
+          alert('系統發生不可預期的錯誤，請再試一次');
         }
-      });
+
+        alert(errors.error.message);
+        this.fireSubmitPost = false;
+      },
+    });
   }
 
   /**
@@ -190,9 +211,9 @@ export class ForumPostEditorComponent implements OnInit {
   public backToBoard() {
     let path = this.router.url;
     if (this.newPost) {
-      path = path.replace("/post", "");
+      path = path.replace('/post', '');
     } else {
-      path = path.replace("/edit", "");
+      path = path.replace('/edit', '');
     }
     this.router.navigate([path]);
   }

@@ -3,9 +3,10 @@ import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrum
 import { CommonService } from 'src/app/services/common-service/common.service';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.sass']
+    selector: 'app-home',
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.sass'],
+    standalone: true
 })
 export class HomeComponent implements OnInit {
 

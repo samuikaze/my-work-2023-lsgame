@@ -11,12 +11,17 @@ import { environment } from 'src/environments/environment';
 import { ForumBoardListComponent } from '../forum-board-list/forum-board-list.component';
 import { ForumPostListComponent } from '../forum-post-list/forum-post-list.component';
 import { ForumPostViewerComponent } from '../forum-post-viewer/forum-post-viewer.component';
+import { CKEditorModule } from 'ckeditor4-angular';
+import { FormsModule } from '@angular/forms';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-forum-reply-editor',
-  templateUrl: './forum-reply-editor.component.html',
-  styleUrls: ['./forum-reply-editor.component.sass'],
-  providers: [ ForumBoardListComponent, ForumPostListComponent, ForumPostViewerComponent ]
+    selector: 'app-forum-reply-editor',
+    templateUrl: './forum-reply-editor.component.html',
+    styleUrls: ['./forum-reply-editor.component.sass'],
+    providers: [ForumBoardListComponent, ForumPostListComponent, ForumPostViewerComponent],
+    standalone: true,
+    imports: [NgIf, FormsModule, CKEditorModule]
 })
 export class ForumReplyEditorComponent implements OnInit {
 

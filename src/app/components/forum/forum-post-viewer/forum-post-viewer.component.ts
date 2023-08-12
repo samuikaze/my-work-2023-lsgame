@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Breadcrumb } from 'src/app/abstracts/common';
 import { Post, Reply, ReplyList } from 'src/app/abstracts/forums';
 import { BaseResponse } from 'src/app/abstracts/http-client';
@@ -10,24 +10,27 @@ import { RequestService } from 'src/app/services/request-service/request.service
 import { environment } from 'src/environments/environment';
 import { ForumBoardListComponent } from '../forum-board-list/forum-board-list.component';
 import { ForumPostListComponent } from '../forum-post-list/forum-post-list.component';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-forum-post-viewer',
-  templateUrl: './forum-post-viewer.component.html',
-  styleUrls: ['./forum-post-viewer.component.sass'],
-  providers: [ ForumBoardListComponent, ForumPostListComponent ]
+    selector: 'app-forum-post-viewer',
+    templateUrl: './forum-post-viewer.component.html',
+    styleUrls: ['./forum-post-viewer.component.sass'],
+    providers: [ForumBoardListComponent, ForumPostListComponent],
+    standalone: true,
+    imports: [NgIf, RouterLink, NgFor, DatePipe]
 })
 export class ForumPostViewerComponent implements OnInit {
 
-  public boardId: number = Number(this.route.snapshot.paramMap.get("fid"));
-  public postId: number = Number(this.route.snapshot.paramMap.get("pid"));
+  public boardId: number;
+  public postId: number;
   public post?: Post;
   public replies: Reply[] = [];
   public postLoaded: boolean = false;
   public repliesLoaded: boolean = false;
   public page = 1;
   public totalPages = 0;
-  public breadcrumb: Breadcrumb = { title: "文章內文一覽", uri: `/forums/${this.boardId}/post/${this.postId}` };
+  public breadcrumb: Breadcrumb;
   public userInfo?: User = undefined;
   constructor(
     private route: ActivatedRoute,
@@ -36,7 +39,11 @@ export class ForumPostViewerComponent implements OnInit {
     private breadcrumbService: BreadcrumbService,
     @Inject(ForumBoardListComponent) private forumBoardListComponent: ForumBoardListComponent,
     @Inject(ForumPostListComponent) private forumPostListComponent: ForumPostListComponent
-  ) { }
+  ) {
+    this.boardId = Number(this.route.snapshot.paramMap.get("fid"));
+    this.postId = Number(this.route.snapshot.paramMap.get("pid"));
+    this.breadcrumb = { title: "文章內文一覽", uri: `/forums/${this.boardId}/post/${this.postId}` };
+  }
 
   ngOnInit(): void {
     this.commonService.setTitle("討論專區");

@@ -8,12 +8,17 @@ import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
 import { environment } from 'src/environments/environment';
 import { GoodsListComponent } from '../goods-list/goods-list.component';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { NgIf, NgFor } from '@angular/common';
 
 @Component({
-  selector: 'app-cart-content',
-  templateUrl: './cart-content.component.html',
-  styleUrls: ['./cart-content.component.sass'],
-  providers: [ GoodsListComponent ]
+    selector: 'app-cart-content',
+    templateUrl: './cart-content.component.html',
+    styleUrls: ['./cart-content.component.sass'],
+    providers: [GoodsListComponent],
+    standalone: true,
+    imports: [NgIf, NgFor, RouterLink, FormsModule]
 })
 export class CartContentComponent implements OnInit {
 

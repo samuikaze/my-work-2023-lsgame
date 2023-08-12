@@ -8,8 +8,8 @@ describe('ForumPostListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ForumPostListComponent ]
-    })
+    imports: [ForumPostListComponent]
+})
     .compileComponents();
   });
 
