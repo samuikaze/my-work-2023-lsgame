@@ -470,6 +470,17 @@ export class NavigatorComponent implements OnInit {
   }
 
   /**
+   * 取得後台管理網址
+   * @returns 後台管理網址
+   */
+  public getAdminPanelUri(): string {
+    const user = JSON.stringify(this.commonService.getUserData());
+    const token = this.secureLocalStorage.encrypt(user);
+
+    return `${environment.adminPanel}/?token=${token}`;
+  }
+
+  /**
    * 取得圖片完整網址
    * @param type 類型
    * @param filename 檔案名稱

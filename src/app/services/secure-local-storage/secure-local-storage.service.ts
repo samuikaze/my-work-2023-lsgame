@@ -15,7 +15,7 @@ export class SecureLocalStorageService {
    * @param value 值
    */
   public set(key: string, value: string): void {
-    value = CryptoJS.AES.encrypt(value, environment.secretKey).toString();
+    value = this.encrypt(value);
 
     localStorage.setItem(key, value);
   }
@@ -29,8 +29,7 @@ export class SecureLocalStorageService {
     let value = localStorage.getItem(key);
 
     if (value != null) {
-      let encoder = CryptoJS.enc.Utf8;
-      value = CryptoJS.AES.decrypt(value, environment.secretKey).toString(encoder);
+      value = this.decrypt(value);
     }
 
     return value;
@@ -51,5 +50,24 @@ export class SecureLocalStorageService {
    */
   public has(key: string): boolean {
     return localStorage.getItem(key) !== null;
+  }
+
+  /**
+   * 加密資料
+   * @param value 欲加密的值
+   * @returns 加密後的字串
+   */
+  public encrypt(value: string): string {
+    return CryptoJS.AES.encrypt(value, environment.secretKey).toString();
+  }
+
+  /**
+   * 解密資料
+   * @param encrypted 加密過的資料
+   * @returns 解密後的資料
+   */
+  public decrypt(encrypted: string): string {
+    const encoder = CryptoJS.enc.Utf8;
+    return CryptoJS.AES.decrypt(encrypted, environment.secretKey).toString(encoder);
   }
 }
