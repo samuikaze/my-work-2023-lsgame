@@ -17,6 +17,7 @@ import { CommonService } from 'src/app/services/common-service/common.service';
 import { NavigatorStatuses } from './navigator';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf, DatePipe } from '@angular/common';
+import { Buffer } from 'buffer';
 
 @Component({
     selector: 'app-navigator',
@@ -53,6 +54,7 @@ export class NavigatorComponent implements OnInit {
   public signUpError: string = "";
   private modals: Modals = {};
   private clockId?: number = undefined;
+  public adminPanelUri: string = "#";
   @Input() public signIn: SignIn = {
     account: "",
     password: "",
@@ -74,7 +76,7 @@ export class NavigatorComponent implements OnInit {
     private router: Router,
     private breadcrumbService: BreadcrumbService,
     private requestService: RequestService,
-    private secureLocalStorage: SecureLocalStorageService,
+    private secureLocalStorageService: SecureLocalStorageService,
     private commonService: CommonService
   ) { }
 
@@ -83,7 +85,8 @@ export class NavigatorComponent implements OnInit {
       if (event instanceof NavigationEnd) {
         this.getBreadcrumb();
         this.getLoginStatus()
-          .then(() => this.checkAuthenticateStatus());
+          .then(() => this.checkAuthenticateStatus())
+          .then(() => this.adminPanelUri = this.getAdminPanelUri());
       }
     });
   }
@@ -221,9 +224,9 @@ export class NavigatorComponent implements OnInit {
     const url = `${environment.ssoApiUri}/api/v1/user/signup`;
     this.requestService.post<BaseResponse<SignInResponse>>(url, this.signUp).subscribe({
       next: response => {
-        this.secureLocalStorage.set("accessToken", response.data.accessToken.token);
-        this.secureLocalStorage.set("refreshToken", response.data.refreshToken.token);
-        this.secureLocalStorage.set("user", JSON.stringify(response.data.user));
+        this.secureLocalStorageService.set("accessToken", response.data.accessToken.token);
+        this.secureLocalStorageService.set("refreshToken", response.data.refreshToken.token);
+        this.secureLocalStorageService.set("user", JSON.stringify(response.data.user));
         this.user = response.data.user;
         this.operationModal("memberModal", "close");
         this.clearForm();
@@ -265,9 +268,9 @@ export class NavigatorComponent implements OnInit {
     const url = `${environment.ssoApiUri}/api/v1/user/signin`;
     this.requestService.post<BaseResponse<SignInResponse>>(url, this.signIn).subscribe({
       next: response => {
-        this.secureLocalStorage.set("accessToken", response.data.accessToken.token);
-        this.secureLocalStorage.set("refreshToken", response.data.refreshToken.token);
-        this.secureLocalStorage.set("user", JSON.stringify(response.data.user));
+        this.secureLocalStorageService.set("accessToken", response.data.accessToken.token);
+        this.secureLocalStorageService.set("refreshToken", response.data.refreshToken.token);
+        this.secureLocalStorageService.set("user", JSON.stringify(response.data.user));
         this.user = response.data.user;
         this.operationModal("memberModal", "close");
         this.clearForm();
@@ -299,7 +302,7 @@ export class NavigatorComponent implements OnInit {
     this.statuses.loaded = false;
 
     if (Object.keys(this.user).length > 0) {
-      const accessToken = this.secureLocalStorage.get("accessToken");
+      const accessToken = this.secureLocalStorageService.get("accessToken");
       if (accessToken !== null) {
         const url = `${environment.ssoApiUri}/api/v1/user/signout`;
         const header = { Authorization: `Bearer ${accessToken}` };
@@ -474,10 +477,20 @@ export class NavigatorComponent implements OnInit {
    * @returns 後台管理網址
    */
   public getAdminPanelUri(): string {
-    const user = JSON.stringify(this.commonService.getUserData());
-    const token = this.secureLocalStorage.encrypt(user);
+    const accessToken = this.secureLocalStorageService.get("accessToken");
 
-    return `${environment.adminPanel}/?token=${token}`;
+    if (accessToken != null) {
+      const data = this.secureLocalStorageService.encrypt(accessToken);
+      const token = Buffer
+        .from(data)
+        .toString("base64")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_");
+
+      return `${environment.backStage}/?token=${token}`;
+    }
+
+    return '';
   }
 
   /**

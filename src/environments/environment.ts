@@ -9,7 +9,7 @@ export const environment = {
   fileStorageServiceUri: "https://localhost:15211/",
   secretKey: "JDJ5JDEwJE1DWDkvbC96RDdvVHljdklEMFY3OE9iLmNaRy4xYnFsSjNBZFdoVlM2aTQ4UjJXd1FhSDJt",
   reverifyToken: 600,
-  adminPanel: "http://localhost:5200",
+  backStage: "http://localhost:5200",
 };
 
 /*

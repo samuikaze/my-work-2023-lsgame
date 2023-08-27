@@ -37,7 +37,7 @@
               </li>
               <li><a class="dropdown-item">確認訂單</a></li>
               <li (click)="operationModal('userSettings', 'open')"><a class="dropdown-item">使用者設定</a></li>
-              <li *ngIf="showAdministratorMenu()"><a class="dropdown-item" [href]="getAdminPanelUri()" target="_blank">後臺管理</a></li>
+              <li *ngIf="showAdministratorMenu()"><a class="dropdown-item" [href]="adminPanelUri" target="_blank">後臺管理</a></li>
               <li (click)="operationModal('signOutModal', 'open')"><a class="dropdown-item">登出</a></li>
             </ul>
           </div>
