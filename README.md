@@ -2,6 +2,8 @@
 
 > [返回根目錄](https://github.com/samuikaze/my-work-2023)
 
+> 請注意，部分功能尚未完成與後端的串接
+
 這是一個模擬遊戲公司網站的作品，使用 Angular + Bootstrap 撰寫而成，其內容包含有
 
 - 首頁
