@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Cart, BackendCart } from 'src/app/abstracts/goods';
 import { BaseResponse } from 'src/app/abstracts/http-client';
 import { environment } from 'src/environments/environment';
 import { RequestService } from '../request-service/request.service';
+import { BackendCart, Cart } from './cart-service';
 
 @Injectable({
   providedIn: 'root'
@@ -149,7 +149,7 @@ export class CartService {
    */
    public saveCart(): void {
     const url = `${environment.backendUri}/goods/cart/save`;
-    const data: BackendCart[] = this.cart.map(good => {
+    const data: Array<BackendCart> = this.cart.map(good => {
       return {
         id: good.id,
         quantity: good.quantity,

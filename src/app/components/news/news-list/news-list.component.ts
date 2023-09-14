@@ -1,14 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { Breadcrumb } from 'src/app/abstracts/common';
 import { BaseResponse } from 'src/app/abstracts/http-client';
-import { News } from 'src/app/abstracts/news';
-import { NewsList } from 'src/app/abstracts/news';
+import { News, NewsType } from 'src/app/components/news/news';
+import { NewsList } from 'src/app/components/news/news';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
 import { environment } from 'src/environments/environment';
 import { RouterLink } from '@angular/router';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
     selector: 'app-news-list',
@@ -19,8 +20,8 @@ import { NgIf, NgFor, DatePipe } from '@angular/common';
 })
 export class NewsListComponent implements OnInit {
 
-  private newsUri = "news";
-  public newsList: News[] = [];
+  public newsTypes: Array<NewsType> = [];
+  public newsList: Array<News> = [];
   public page: number = 1;
   public totalPages: number = 0;
   public loaded: boolean = false;
@@ -34,7 +35,22 @@ export class NewsListComponent implements OnInit {
   ngOnInit(): void {
     this.commonService.setTitle("最新消息");
     this.breadcrumbService.setBreadcrumb(this.breadcrumb);
+    this.getNewsTypes();
     this.getNews();
+  }
+
+  /**
+   * 取的所有消息種類
+   */
+  private getNewsTypes(): void {
+    const uri = `${environment.commonUri}/news/types`;
+    this.requestService.get<Array<NewsType>>(uri)
+      .subscribe({
+        next: response => {
+          this.newsTypes = response;
+        },
+        error: (errors: HttpErrorResponse) => {},
+      })
   }
 
   /**
@@ -44,12 +60,12 @@ export class NewsListComponent implements OnInit {
     this.loaded = false;
     this.newsList = [];
 
-    const URL = `${environment.backendUri}/${this.newsUri}`
-    const PARAMS = {page: this.page};
-    this.requestService.get<BaseResponse<NewsList>>(URL, PARAMS)
-      .subscribe(data => {
-        this.newsList = data.data.newsList;
-        this.totalPages = data.data.totalPages;
+    const uri = `${environment.commonUri}/news`
+    const params = {page: this.page};
+    this.requestService.get<NewsList>(uri, params)
+      .subscribe(response => {
+        this.newsList = response.newsList;
+        this.totalPages = response.totalPages;
         this.loaded = true;
       });
   }
@@ -72,5 +88,17 @@ export class NewsListComponent implements OnInit {
    */
   public composeNewsDetailUrl(id: number): string {
     return `/news/${id}`;
+  }
+
+  /**
+   * 以消息種類 PK 取得消息種類名稱
+   */
+  public getNewsTypeById(id: number): string {
+    const newsType = this.newsTypes.filter(type => type.newsTypeId === id);
+    if (newsType.length === 0) {
+      return "";
+    }
+
+    return newsType[0].name;
   }
 }

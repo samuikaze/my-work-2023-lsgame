@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { inject } from '@angular/core';
+import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
 import { CommonService } from '../services/common-service/common.service';
 
-@Injectable({
+/* @Injectable({
   providedIn: 'root'
 })
 export class AuthenticateGuard implements CanActivate {
@@ -17,7 +17,7 @@ export class AuthenticateGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    const authed = this.commonService.getUserData() !== undefined;
+    const authed = this.commonService.checkAuthenticateState();
 
     if (! authed) {
       alert("請先登入");
@@ -26,4 +26,22 @@ export class AuthenticateGuard implements CanActivate {
     return authed;
   }
 
+} */
+
+export const authenticateGuard: CanActivateFn = (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
+): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree => {
+  return new Promise<boolean>(async (resolve, reject) => {
+    const commonService = inject(CommonService);
+    const router = inject(Router);
+    const authed = await commonService.checkAuthenticateState();
+
+    if (! authed) {
+      alert("請先登入");
+      router.navigate(['/']);
+    }
+
+    resolve(authed);
+  });
 }

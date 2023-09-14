@@ -2,7 +2,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, Inject, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Breadcrumb } from 'src/app/abstracts/common';
-import { Cart, Good } from 'src/app/abstracts/goods';
 import { BaseResponse } from 'src/app/abstracts/http-client';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CartService } from 'src/app/services/cart-service/cart.service';
@@ -11,6 +10,8 @@ import { RequestService } from 'src/app/services/request-service/request.service
 import { environment } from 'src/environments/environment';
 import { GoodsListComponent } from '../goods-list/goods-list.component';
 import { NgIf } from '@angular/common';
+import { Good } from '../good';
+import { Cart } from 'src/app/services/cart-service/cart-service';
 
 @Component({
     selector: 'app-goods-content',
@@ -23,7 +24,7 @@ import { NgIf } from '@angular/common';
 export class GoodsContentComponent implements OnInit {
 
   private apiPath = "";
-  public goodId: number = Number(this.route.snapshot.paramMap.get("id"));
+  public goodId?: number;
   public good?: Good;
   public cartPrice: number = 0;
   public cartQuantity: number = 0;
@@ -39,10 +40,18 @@ export class GoodsContentComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.getGoodId();
     this.composeApiPath();
     this.preprocessBreadcrumb();
     this.getCart();
     this.getGood();
+  }
+
+  /**
+   * 取得商品 PK
+   */
+  private getGoodId(): void {
+    this.goodId = Number(this.route.snapshot.paramMap.get("id"));
   }
 
   /**
@@ -71,7 +80,7 @@ export class GoodsContentComponent implements OnInit {
    */
    public addToCart(newGood: Good, quantity: number) {
     const CART: Cart = {
-      id: newGood.id,
+      id: newGood.goodId,
       name: newGood.name,
       prices: newGood.price,
       quantity: quantity
@@ -100,7 +109,7 @@ export class GoodsContentComponent implements OnInit {
       throw new Error("消息 ID 不符合系統規定");
     }
 
-    this.apiPath = `goods/${this.goodId}`;
+    this.apiPath = `shop/goods/${this.goodId}`;
   }
 
   /**
@@ -119,11 +128,11 @@ export class GoodsContentComponent implements OnInit {
     this.loaded = false;
     this.good = undefined;
 
-    const URL = `${environment.backendUri}/${this.apiPath}`;
-    this.requestService.get<BaseResponse<Good>>(URL)
+    const uri = `${environment.shopUri}/${this.apiPath}`;
+    this.requestService.get<Good>(uri)
       .subscribe({
-        next: data => {
-          this.good = data.data
+        next: response => {
+          this.good = response
           this.loaded = true;
         },
         error: (error: HttpErrorResponse) => {

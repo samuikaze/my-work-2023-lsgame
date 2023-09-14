@@ -31,3 +31,12 @@
 3. 執行指令 `npm i && npm run start`
 
 若系統有安裝 VSCode，也可以直接透過 F5 或偵錯面板啟動前端專案
+
+## 參考資料
+
+- [Base64URL decoding via JavaScript?](https://stackoverflow.com/a/51838635)
+- [how to use async inside html](https://stackoverflow.com/a/71314585)
+- [Infinite loop while use function with http-call in *ngFor with async pipe](https://stackoverflow.com/a/44345900)
+- [CanActivate is deprecated. How to refactor? [duplicate]](https://stackoverflow.com/a/75826784)
+- [How to reject in async/await syntax?](https://stackoverflow.com/a/42453705)
+- [Convert a Unix timestamp to time in JavaScript](https://stackoverflow.com/a/847196)

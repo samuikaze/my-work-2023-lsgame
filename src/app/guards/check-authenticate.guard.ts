@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { Injectable, inject } from '@angular/core';
+import { ActivatedRouteSnapshot, CanActivate, CanActivateFn, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
 import { CommonService } from '../services/common-service/common.service';
 
-@Injectable({
+/* @Injectable({
   providedIn: 'root'
 })
 export class CheckAuthenticateGuard implements CanActivate {
@@ -19,4 +19,15 @@ export class CheckAuthenticateGuard implements CanActivate {
     return true;
   }
 
+} */
+
+export const checkAuthenticateGuard: CanActivateFn = (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
+): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree => {
+    const commonService = inject(CommonService);
+
+    commonService.checkAuthenticateState();
+
+    return true;
 }

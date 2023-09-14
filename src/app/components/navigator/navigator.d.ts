@@ -1,3 +1,5 @@
+import { Modal } from "bootstrap";
+
 export interface NavigatorStatuses {
   signInPWVisible: boolean;
   signUpPWVisible: boolean;
@@ -5,4 +7,22 @@ export interface NavigatorStatuses {
   loaded: boolean;
   logining: boolean;
   logined: boolean;
+  updatingUser: boolean;
+}
+
+export declare interface Modals {
+  [key: string]: Modal
+}
+
+export declare interface SignIn {
+  account: string;
+  password: string;
+}
+
+export declare interface SignUp {
+  account: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  name: string;
 }

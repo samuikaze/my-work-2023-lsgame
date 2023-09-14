@@ -9,7 +9,6 @@ import { withInterceptorsFromDi, provideHttpClient } from '@angular/common/http'
 import { FormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app/app-routing.module';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
-import { CheckAuthenticateGuard } from './app/guards/check-authenticate.guard';
 
 if (environment.production) {
   enableProdMode();
@@ -18,7 +17,6 @@ if (environment.production) {
 bootstrapApplication(AppComponent, {
     providers: [
         importProvidersFrom(BrowserModule, AppRoutingModule, FormsModule, LightboxModule),
-        CheckAuthenticateGuard,
         provideHttpClient(withInterceptorsFromDi())
     ]
 })
