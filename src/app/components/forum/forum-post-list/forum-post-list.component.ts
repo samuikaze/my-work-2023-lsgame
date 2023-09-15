@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, Inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Breadcrumb } from 'src/app/abstracts/common';
-import { Post } from 'src/app/abstracts/forums';
+import { Post } from 'src/app/components/forum/forums';
 import { BaseResponse } from 'src/app/abstracts/http-client';
 import { UserInformation } from 'src/app/abstracts/single-sign-on';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
@@ -11,6 +11,8 @@ import { RequestService } from 'src/app/services/request-service/request.service
 import { environment } from 'src/environments/environment';
 import { ForumBoardListComponent } from '../forum-board-list/forum-board-list.component';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { SecureLocalStorageService } from 'src/app/services/secure-local-storage/secure-local-storage.service';
+import { Buffer } from 'buffer';
 
 @Component({
   selector: 'app-forum-post-list',
@@ -23,16 +25,19 @@ import { NgIf, NgFor, DatePipe } from '@angular/common';
 export class ForumPostListComponent implements OnInit {
   public boardId?: number;
   public posts: Post[] = [];
+  public userInformations: Array<UserInformation> = [];
   public page: number = 1;
   public totalPages: number = 1;
   public loaded: boolean = false;
   public breadcrumb: Breadcrumb;
+  public authenticated: boolean = false;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private commonService: CommonService,
     private requestService: RequestService,
     private breadcrumbService: BreadcrumbService,
+    private secureLocalStorageService: SecureLocalStorageService,
     @Inject(ForumBoardListComponent)
     private forumBoardListComponent: ForumBoardListComponent
   ) {
@@ -47,6 +52,7 @@ export class ForumPostListComponent implements OnInit {
     this.commonService.setTitle('討論專區');
     this.preprocessBreadcrumb();
     this.getBoardPosts();
+    this.authenticated = this.checkAuthenticateState();
   }
 
   /**
@@ -66,11 +72,13 @@ export class ForumPostListComponent implements OnInit {
     this.loaded = false;
     this.posts = [];
 
-    const URL = `${environment.backendUri}/forums/boards/${this.boardId}`;
+    const URL = `${environment.forumUri}/forums/boards/${this.boardId}`;
     this.requestService.get<BaseResponse<Post[]>>(URL).subscribe({
-      next: (data) => {
-        this.posts = data.data;
-        const userId = data.data.map((post) => post.post_user_id);
+      next: (response) => {
+        this.posts = response.data;
+        const userId = [
+          ...new Set(response.data.map((post) => post.post_user_id)),
+        ];
         this.getUserNameByIds(userId);
       },
     });
@@ -104,11 +112,18 @@ export class ForumPostListComponent implements OnInit {
     }
   }
 
-  public checkAuthenticateState() {
-    return this.commonService.getUserData() !== undefined;
+  /**
+   * 檢查登入狀態
+   * @returns 是否登入
+   */
+  public checkAuthenticateState(): boolean {
+    return this.commonService.checkAuthenticateStateOffline();
   }
 
-  public getUserNameByIds(id: Array<number>) {
+  /**
+   * 以使用者帳號 PK 取得帳號資訊
+   */
+  public getUserNameByIds(id: Array<number>): void {
     this.requestService
       .post<BaseResponse<Array<UserInformation>>>(
         `${environment.ssoApiUri}/api/v1/users`,
@@ -116,12 +131,7 @@ export class ForumPostListComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
-          this.posts.map((post) => {
-            post.post_user = response.data.filter(
-              (user) => user.id == post.post_user_id
-            )[0].name;
-            return post;
-          });
+          this.userInformations = response.data;
           this.loaded = true;
         },
         error: (errors: HttpErrorResponse) => {
@@ -129,5 +139,17 @@ export class ForumPostListComponent implements OnInit {
           this.loaded = true;
         },
       });
+  }
+
+  /**
+   * 以使用者帳號 PK 取得帳號名稱
+   */
+  public getUserNameById(id: number): string {
+    const user = this.userInformations.filter((user) => user.id === id);
+    if (user.length === 0) {
+      return '(未知使用者)';
+    }
+
+    return user[0].username;
   }
 }

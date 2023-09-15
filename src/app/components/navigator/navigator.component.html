@@ -14,7 +14,10 @@
         </nav>
       </div>
       <div class="user col-2 mb-2 text-end">
-        <button type="button" class="btn btn-info" *ngIf="statuses.logining">請稍候...</button>
+        <button type="button" class="btn btn-info" *ngIf="statuses.logining">
+          <span class="spinner-border spinner-border-sm" aria-hidden="true" *ngIf="statuses.logining"></span>
+          請稍候...
+        </button>
         <div class="dropdown">
           <button *ngIf="isLoginBtnShow()" class="btn btn-info" type="button"
             (click)="operationModal('memberModal', 'open')">
@@ -90,8 +93,15 @@
             </div>
             <div class="d-grid gap-2 d-md-flex justify-content-md-center">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-              <button type="button" class="btn btn-primary" (click)="fireSignIn()" [disabled]="statuses.logining">
-                {{ statuses.logining ? "登入中..." : "登入" }}</button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="fireSignIn()"
+                [disabled]="statuses.logining"
+              >
+                <span class="spinner-border spinner-border-sm" aria-hidden="true" *ngIf="statuses.logining"></span>
+                {{ statuses.logining ? "登入中..." : "登入" }}
+              </button>
             </div>
           </div>
           <div class="tab-pane fade" id="pills-sign-up" role="tabpanel" aria-labelledby="pills-sign-up-tab"
@@ -114,7 +124,7 @@
             </div>
             <div class="mb-3">
               <label for="account" class="form-label">暱稱</label>
-              <input type="string" [(ngModel)]="signUp.name" class="form-control" id="account" placeholder="請輸入暱稱">
+              <input type="string" [(ngModel)]="signUp.username" class="form-control" id="account" placeholder="請輸入暱稱">
             </div>
             <div class="mb-3">
               <label for="password" class="form-label">密碼</label>
@@ -140,7 +150,10 @@
             </div>
             <div class="d-grid gap-2 d-md-flex justify-content-md-center">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-              <button type="button" class="btn btn-primary" (click)="fireSignUp()">註冊</button>
+              <button type="button" class="btn btn-primary" (click)="fireSignUp()" [disabled]="statuses.signUping">
+                <span class="spinner-border spinner-border-sm" aria-hidden="true" *ngIf="statuses.signUping"></span>
+                {{ statuses.signUping ? '註冊並登入中 ...' : '註冊' }}
+              </button>
             </div>
           </div>
         </div>
@@ -163,6 +176,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
         <button type="button" class="btn btn-danger" (click)="fireSignOut()" [disabled]="!statuses.loaded">
+          <span class="spinner-border spinner-border-sm" aria-hidden="true" *ngIf="!statuses.loaded"></span>
           {{ statuses.loaded ? "登出" : "登出中..." }}
         </button>
       </div>

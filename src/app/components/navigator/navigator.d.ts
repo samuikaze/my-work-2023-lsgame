@@ -4,6 +4,7 @@ export interface NavigatorStatuses {
   signInPWVisible: boolean;
   signUpPWVisible: boolean;
   signUpPWConfirmVisible: boolean;
+  signUping: boolean;
   loaded: boolean;
   logining: boolean;
   logined: boolean;
@@ -24,5 +25,5 @@ export declare interface SignUp {
   email: string;
   password: string;
   password_confirmation: string;
-  name: string;
+  username: string;
 }

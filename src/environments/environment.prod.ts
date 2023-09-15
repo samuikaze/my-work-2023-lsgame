@@ -1,7 +1,11 @@
 export const environment = {
   production: true,
-  backendUri: "",
-  newsUri: "",
+  commonUri: "",
+  shopUri: "",
+  forumUri: "",
+  ssoApiUri: "",
   fileStorageServiceUri: "",
-  adminPanel: ""
+  adminPanel: "",
+  secretKey: "",
+  backStage: "",
 };

@@ -86,7 +86,8 @@
           <tr *ngFor="let news of newsList">
             <td>{{ news.createdAt | date: "yyyy-MM-dd" }}</td>
             <td><span class="badge bg-primary">{{ getNewsTypeById(news.newsTypeId) }}</span></td>
-            <td>{{ news.newsTitle }}</td>
+            <td>
+              <a [routerLink]="getNewsLink(news.newsId)" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">{{ news.newsTitle }}</a></td>
           </tr>
         </tbody>
       </table>

@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, Inject, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Breadcrumb } from 'src/app/abstracts/common';
-import { Category, Post, PostEdit } from 'src/app/abstracts/forums';
+import { Category, Post, PostEdit } from 'src/app/components/forum/forums';
 import { BaseResponse } from 'src/app/abstracts/http-client';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
@@ -138,7 +138,7 @@ export class ForumPostEditorComponent implements OnInit {
     this.categoriesLoaded = false;
     this.categories = [];
 
-    const URL = `${environment.backendUri}/forums/commons/post/types`;
+    const URL = `${environment.forumUri}/forums/commons/post/types`;
     this.requestService.get<BaseResponse<Category[]>>(URL).subscribe((data) => {
       this.categories = data.data;
       this.categoriesLoaded = true;
@@ -156,7 +156,7 @@ export class ForumPostEditorComponent implements OnInit {
       content: '',
     };
 
-    const URL = `${environment.backendUri}/forums/boards/${this.boardId}/posts/${this.postId}`;
+    const URL = `${environment.forumUri}/forums/boards/${this.boardId}/posts/${this.postId}`;
     this.requestService.get<BaseResponse<Post>>(URL).subscribe((data) => {
       this.postModel.title = data.data.title;
       this.postModel.category = data.data.category_id;
@@ -180,10 +180,10 @@ export class ForumPostEditorComponent implements OnInit {
     let url = '';
     let client = undefined;
     if (this.postId !== undefined) {
-      url = `${environment.backendUri}/forums/boards/${this.boardId}/post/${this.postId}`;
+      url = `${environment.forumUri}/forums/boards/${this.boardId}/post/${this.postId}`;
       client = this.requestService.patch<BaseResponse<null>>(url, POST);
     } else {
-      url = `${environment.backendUri}/forums/boards/${this.boardId}/posts`;
+      url = `${environment.forumUri}/forums/boards/${this.boardId}/posts`;
       client = this.requestService.post<BaseResponse<null>>(url, POST);
     }
 

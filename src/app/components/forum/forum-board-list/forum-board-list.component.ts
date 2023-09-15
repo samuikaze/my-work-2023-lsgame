@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Breadcrumb } from 'src/app/abstracts/common';
-import { Board } from 'src/app/abstracts/forums';
+import { Board } from 'src/app/components/forum/forums';
 import { BaseResponse } from 'src/app/abstracts/http-client';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
@@ -41,8 +41,8 @@ export class ForumBoardListComponent implements OnInit {
     this.loaded = false;
     this.boards = [];
 
-    const URL = `${environment.backendUri}/${this.apiPath}`;
-    this.requestService.get<BaseResponse<Board[]>>(URL)
+    const uri = `${environment.forumUri}/${this.apiPath}`;
+    this.requestService.get<BaseResponse<Board[]>>(uri)
       .subscribe(data => {
         this.boards = data.data;
         this.loaded = true;

@@ -12,6 +12,7 @@ import { RouterLink } from '@angular/router';
 import { NgIf, NgFor } from '@angular/common';
 import { Good } from '../good';
 import { Cart } from 'src/app/services/cart-service/cart-service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
     selector: 'app-cart-content',
@@ -71,13 +72,6 @@ export class CartContentComponent implements OnInit {
   }
 
   /**
-   * 取得儲存的購物車
-   */
-  public getSavedCart(): void {
-    const url = `${environment.backendUri}/`
-  }
-
-  /**
    * 取得購物車詳細資訊
    */
   public getCartGoodDetails(): void {
@@ -107,13 +101,6 @@ export class CartContentComponent implements OnInit {
     this.cartService.resetCart();
 
     this.getCartGoodDetails();
-  }
-
-  /**
-   * 儲存購物車
-   */
-  public saveCart(): void {
-    this.cartService.saveCart();
   }
 
   /**

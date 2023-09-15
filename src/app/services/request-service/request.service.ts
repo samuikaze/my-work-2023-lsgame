@@ -69,8 +69,10 @@ export class RequestService {
       console.error(`請求過程中發生錯誤: ${error.message}`);
     }
 
+    const errorMessage = (error.error.message == null) ? error.message : error.error.message;
+
     if (error.status >= 400 && error.status < 500) {
-      alert(`給定的資料有誤，訊息為: ${error.message}`)
+      alert(`給定的資料有誤，訊息為: ${errorMessage}`)
     }
 
     if (error.status >= 500) {

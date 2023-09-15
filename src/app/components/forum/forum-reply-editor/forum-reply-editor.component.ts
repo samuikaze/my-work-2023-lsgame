@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, Inject, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Breadcrumb } from 'src/app/abstracts/common';
-import { ReplyEdit } from 'src/app/abstracts/forums';
+import { ReplyEdit } from 'src/app/components/forum/forums';
 import { BaseResponse } from 'src/app/abstracts/http-client';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
@@ -90,10 +90,10 @@ export class ForumReplyEditorComponent implements OnInit {
     let url = "";
     let client = undefined;
     if (this.replyId !== undefined) {
-      url = `${environment.backendUri}/forums/boards/${this.boardId}/post/${this.postId}/reply/${this.replyId}`;
+      url = `${environment.forumUri}/forums/boards/${this.boardId}/post/${this.postId}/reply/${this.replyId}`;
       client = this.requestService.patch<BaseResponse<null>>(url, this.replyModel);
     } else {
-      url = `${environment.backendUri}/forums/boards/${this.boardId}/post/${this.postId}/replies`;
+      url = `${environment.forumUri}/forums/boards/${this.boardId}/post/${this.postId}/replies`;
       client = this.requestService.post<BaseResponse<null>>(url, this.replyModel);
     }
 
@@ -174,7 +174,7 @@ export class ForumReplyEditorComponent implements OnInit {
     this.replyModel.title = "";
     this.replyModel.content = "";
 
-    const URL = `${environment.backendUri}/forums/boards/${this.boardId}/posts/${this.postId}/replies/${this.replyId}`;
+    const URL = `${environment.forumUri}/forums/boards/${this.boardId}/posts/${this.postId}/replies/${this.replyId}`;
     this.requestService.get<BaseResponse<ReplyEdit>>(URL)
       .subscribe(data => {
         this.replyModel.title = data.data.title;

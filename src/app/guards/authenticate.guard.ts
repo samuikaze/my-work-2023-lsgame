@@ -28,6 +28,12 @@ export class AuthenticateGuard implements CanActivate {
 
 } */
 
+/**
+ * 驗證登入權杖是否有效 (離線驗證，過期不會重取權杖)
+ * @param route
+ * @param state
+ * @returns 是否登入
+ */
 export const authenticateGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot
@@ -35,7 +41,7 @@ export const authenticateGuard: CanActivateFn = (
   return new Promise<boolean>(async (resolve, reject) => {
     const commonService = inject(CommonService);
     const router = inject(Router);
-    const authed = await commonService.checkAuthenticateState();
+    const authed = await commonService.checkAuthenticateStateOffline();
 
     if (! authed) {
       alert("請先登入");

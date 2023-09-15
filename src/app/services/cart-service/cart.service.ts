@@ -143,30 +143,4 @@ export class CartService {
 
     return PRICES;
   }
-
-  /**
-   * 儲存購物車
-   */
-   public saveCart(): void {
-    const url = `${environment.backendUri}/goods/cart/save`;
-    const data: Array<BackendCart> = this.cart.map(good => {
-      return {
-        id: good.id,
-        quantity: good.quantity,
-        price: good.prices
-      };
-    });
-
-    this.requestService.post<BaseResponse<[]>>(url, { cart: data })
-      .subscribe();
-  }
-
-  /**
-   * 移除儲存的購物車
-   */
-  public removeSavedCart(): void {
-    const url = `${environment.backendUri}/goods/cart/${1}`;
-    this.requestService.post<BaseResponse<null>>(url, { _method: "delete" })
-      .subscribe();
-  }
 }

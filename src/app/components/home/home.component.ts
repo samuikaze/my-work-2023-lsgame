@@ -7,14 +7,14 @@ import { environment } from 'src/environments/environment';
 import { HttpErrorResponse } from '@angular/common/http';
 import { HomeStatus } from './home';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.sass'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, RouterModule]
 })
 export class HomeComponent implements OnInit {
   public newsList: Array<News> = [];
@@ -105,7 +105,20 @@ export class HomeComponent implements OnInit {
     return newsType[0].name;
   }
 
+  /**
+   * 跳轉頁面到指定路徑
+   * @param path 跳轉路徑
+   */
   public navigate(...path: Array<string>): void {
     this.router.navigate(path);
+  }
+
+  /**
+   * 以最新消息 PK 取得最新消息頁面路徑
+   * @param newsId 最新消息 PK
+   * @returns 最新消息頁面路徑
+   */
+  public getNewsLink(newsId: number): string {
+    return `/news/${newsId}`;
   }
 }

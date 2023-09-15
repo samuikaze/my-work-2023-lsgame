@@ -36,6 +36,7 @@ export class NavigatorComponent implements OnInit {
     signUpPWVisible: false,
     signUpPWConfirmVisible: false,
     loaded: false,
+    signUping: false,
     logining: false,
     logined: false,
     updatingUser: false,
@@ -66,7 +67,7 @@ export class NavigatorComponent implements OnInit {
     password: '',
     password_confirmation: '',
     email: '',
-    name: '',
+    username: '',
   };
   @Input() public modifyUser: UpdateUser = {
     username: '',
@@ -97,8 +98,8 @@ export class NavigatorComponent implements OnInit {
    * 取得登入狀態
    */
   private getLoginStatus(): Promise<boolean> {
-    return new Promise<boolean>(async (resolve, rejects) => {
-      this.user = (await this.commonService.getUserData()) || {};
+    return new Promise<boolean>((resolve, rejects) => {
+      this.user = this.commonService.getUserData() || {};
       if (Object.keys(this.user).length > 0) {
         this.statuses.logined = true;
       }
@@ -186,34 +187,24 @@ export class NavigatorComponent implements OnInit {
    * 註冊
    */
   public fireSignUp(): void {
-    this.statuses.loaded = false;
-
     if (
       this.signUp.account.length == 0 ||
       this.signUp.password.length == 0 ||
       this.signUp.password_confirmation.length == 0 ||
       this.signUp.email.length == 0 ||
-      this.signUp.name.length == 0
+      this.signUp.username.length == 0
     ) {
       this.signUpError = '請確認所有欄位是否皆已填妥';
-      this.statuses.loaded = true;
       return;
     }
+
+    this.statuses.signUping = true;
 
     const url = `${environment.ssoApiUri}/api/v1/user/signup`;
     this.requestService
       .post<BaseResponse<SignInResponse>>(url, this.signUp)
       .subscribe({
         next: (response) => {
-          const base64UriUser = Buffer.from(
-            response.data.accessToken.token,
-            'base64'
-          )
-            .toString('ascii')
-            .split('.')[1]
-            .replace(/-/g, '+')
-            .replace(/_/g, '/');
-          const user = Buffer.from(base64UriUser, 'base64').toString('ascii');
           this.secureLocalStorageService.set(
             'accessToken',
             response.data.accessToken.token
@@ -222,12 +213,23 @@ export class NavigatorComponent implements OnInit {
             'refreshToken',
             response.data.refreshToken.token
           );
-          this.secureLocalStorageService.set('user', user);
-          this.user = JSON.parse(user);
+          const base64UriUser = Buffer.from(
+            response.data.accessToken.token,
+            'base64'
+          )
+            .toString('ascii')
+            .split('.')[1]
+            .replace(/-/g, '+')
+            .replace(/_/g, '/');
+          const user = JSON.parse(
+            Buffer.from(base64UriUser, 'base64').toString('ascii')
+          );
+          this.getUserData(user);
           this.operationModal('memberModal', 'close');
           this.clearForm();
           this.toggleModalStatus(true);
-          this.statuses.loaded = true;
+          this.statuses.signUping = false;
+          this.statuses.logined = true;
         },
         error: (error: HttpErrorResponse) => {
           if (error.status >= 500) {
@@ -241,7 +243,7 @@ export class NavigatorComponent implements OnInit {
             this.signUpError = errorMsg;
           }
 
-          this.statuses.loaded = true;
+          this.statuses.signUping = false;
         },
       });
   }
@@ -255,7 +257,7 @@ export class NavigatorComponent implements OnInit {
 
     if (this.signIn.account.length == 0 || this.signIn.password.length == 0) {
       this.signInError = '請確認所有欄位是否皆已填妥';
-      this.statuses.loaded = true;
+      this.statuses.logining = false;
       return;
     }
 
@@ -288,22 +290,25 @@ export class NavigatorComponent implements OnInit {
           this.clearForm();
           this.toggleModalStatus(true);
           this.statuses.logined = true;
+          this.statuses.logining = false;
         },
         error: (error: HttpErrorResponse) => {
           if (error.status >= 500) {
             this.signInError =
               '系統發生無法預期的錯誤，請聯絡網站管理員協助處理';
-          } else {
+          } else if (error.status >= 400 && error.status < 500) {
             let errorMsg = (error.error as BaseResponse<null>).message;
-            if (errorMsg === null) {
+            if (errorMsg == null) {
               errorMsg = '請再次確認輸入的資訊是否正確';
             }
             this.signInError = errorMsg;
+          } else {
+            this.signInError =
+              '系統發生無法預期的錯誤，請聯絡網站管理員協助處理';
           }
-        },
-        complete: () => {
+
           this.statuses.logining = false;
-        },
+        }
       });
   }
 
@@ -388,7 +393,7 @@ export class NavigatorComponent implements OnInit {
       password: '',
       password_confirmation: '',
       email: '',
-      name: '',
+      username: '',
     };
   }
 
@@ -622,25 +627,25 @@ export class NavigatorComponent implements OnInit {
         ? this.modifyUser.password_confirmation
         : null;
     const body = {
+      _method: 'PATCH',
       username: this.modifyUser.username,
       email: this.modifyUser.email,
       password: password,
       passwordConfirmation: passwordConfirmation,
     };
 
-    const uri = `${environment.ssoApiUri}/api/v1/user`;
-    this.requestService.patch<BaseResponse<UpdateUserResponse>>(uri, body)
+    const uri = `${environment.ssoApiUri}/api/v1/user/update`;
+    this.requestService.post<BaseResponse<UpdateUserResponse>>(uri, body)
       .subscribe({
         next: response => {
           const user = Object.assign(this.user, response.data);
           this.user = this.commonService.deepCloneObject(user);
           this.modifyUser = this.commonService.deepCloneObject(user);
           this.secureLocalStorageService.set("user", JSON.stringify(user));
+          this.statuses.updatingUser = false;
         },
         error: (errors: HttpErrorResponse) => {
           this.requestService.requestFailedHandler(errors);
-        },
-        complete: () => {
           this.statuses.updatingUser = false;
         }
       });

@@ -144,6 +144,11 @@ export class CommonService {
       return false;
     }
 
+    const expireDate = new Date((userAccessToken.exp ?? 0) * 1000);
+    if (new Date() > expireDate) {
+      return false;
+    }
+
     return true;
   }
 
@@ -165,6 +170,7 @@ export class CommonService {
       try {
         return await this.reactiveAccessToken();
       } catch (error) {
+        console.error(error);
         this.clearAuthenticateData();
         alert(error);
         return false;
@@ -184,7 +190,13 @@ export class CommonService {
       throw new Error("重整權杖不存在");
     }
 
-    const payloadJson = Buffer.from(refreshToken, 'base64').toString('ascii').split('.')[1];
+    const payloadBase64 = Buffer
+      .from(refreshToken, 'base64')
+      .toString('ascii')
+      .split('.')[1]
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+    const payloadJson = Buffer.from(payloadBase64, 'base64').toString('ascii');
     const payloads = JSON.parse(payloadJson) as RefreshTokenPayloads;
     const expireDate = new Date((payloads.exp ?? 0) * 1000);
     if (new Date() > expireDate) {
@@ -194,7 +206,7 @@ export class CommonService {
     const uri = `${environment.ssoApiUri}/api/v1/user/token/refresh`;
     const header = { Authorization: `Bearer ${refreshToken}` };
     return new Promise<boolean>((resolve, reject) => {
-      this.requestService.post<BaseResponse<SignInResponse>>(uri, undefined, header)
+      this.requestService.post<BaseResponse<SignInResponse>>(uri, undefined, undefined, header)
         .subscribe({
           next: response => {
             this.secureLocalStorageService.set("accessToken", response.data.accessToken.token);
@@ -257,8 +269,8 @@ export class CommonService {
    * 登入相關資料
    * @returns 登入帳號相關資料
    */
-  public async getUserData(): Promise<TokenUser | undefined> {
-    await this.checkAuthenticateState();
+  public getUserData(): TokenUser | undefined {
+    // await this.checkAuthenticateState();
 
     let user = this.secureLocalStorageService.get("user") || "";
     if (user.length === 0) {

@@ -21,6 +21,12 @@ export class CheckAuthenticateGuard implements CanActivate {
 
 } */
 
+/**
+ * 驗證登入權杖是否有效 (線上驗證，過期會重取權杖)
+ * @param route
+ * @param state
+ * @returns 是否登入
+ */
 export const checkAuthenticateGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot
