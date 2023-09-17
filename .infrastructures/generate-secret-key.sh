@@ -1,3 +1,5 @@
+#!/bin/ash
+
 # Generate secret key here.
 SECRET_KEY=$(echo $(uuidgen | sed 's/[-]//g')$(openssl rand -hex 20) | base64 -w 0)
 

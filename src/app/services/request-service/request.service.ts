@@ -16,6 +16,28 @@ export class RequestService {
   ) { }
 
   /**
+   * URL 前處理
+   *
+   * @param originalUri 原始傳入的網址
+   * @returns 經處理後的網址
+   */
+  private preprocessUri(originalUri: string): string {
+    if (
+      originalUri.indexOf('https://') > -1 ||
+      originalUri.indexOf('http://') > -1
+    ) {
+      return originalUri;
+    }
+
+    const protocol = `${location.protocol}//`
+    const hostname = location.hostname;
+    const path = location.pathname;
+    const uri = originalUri.substring(1);
+
+    return `${protocol}${hostname}${path}/${uri}`;
+  }
+
+  /**
    * 取得標頭
    * @param header 自訂標頭
    * @return 組合完的標頭
@@ -90,6 +112,7 @@ export class RequestService {
   public get<T>(url: string, param?: BaseParams, header?: CustomerHeaders): Observable<T> {
     this.setHeaders(header);
     const PARAMS = this.setParams(param);
+    url = this.preprocessUri(url);
 
     return this.http.get<T>(url, {
         headers: this.headers,
@@ -108,6 +131,7 @@ export class RequestService {
   public post<T>(url: string, body?: RequestBody, param?: BaseParams, header?: CustomerHeaders): Observable<T> {
     this.setHeaders(header);
     const PARAMS = this.setParams(param);
+    url = this.preprocessUri(url);
 
     return this.http.post<T>(url, body, {
         headers: this.headers,
@@ -126,6 +150,7 @@ export class RequestService {
    public put<T>(url: string, body?: RequestBody, param?: BaseParams, header?: CustomerHeaders): Observable<T> {
     this.setHeaders(header);
     const PARAMS = this.setParams(param);
+    url = this.preprocessUri(url);
 
     return this.http.put<T>(url, body, {
         headers: this.headers,
@@ -144,6 +169,7 @@ export class RequestService {
   public patch<T>(url: string, body?: RequestBody, param?: BaseParams, header?: CustomerHeaders): Observable<T> {
     this.setHeaders(header);
     const PARAMS = this.setParams(param);
+    url = this.preprocessUri(url);
 
     return this.http.patch<T>(url, body, {
         headers: this.headers,
@@ -161,6 +187,7 @@ export class RequestService {
    public delete<T>(url: string, param?: BaseParams, header?: CustomerHeaders): Observable<T> {
     this.setHeaders(header);
     const PARAMS = this.setParams(param);
+    url = this.preprocessUri(url);
 
     return this.http.delete<T>(url, {
         headers: this.headers,
