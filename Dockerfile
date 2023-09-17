@@ -5,7 +5,7 @@ WORKDIR /usr/app
 COPY ./package*.json ./
 RUN apk update && \
   apk add --no-cache \
-    util-linux
+    util-linux \
     openssl && \
   npm install -g @angular/cli \
   && npm install
