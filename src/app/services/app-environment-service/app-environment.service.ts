@@ -1,20 +1,21 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable, inject, isDevMode } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
+import { RequestService } from '../request-service/request.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AppEnvironmentService {
   private configFromJson?: any = undefined;
-  constructor(private httpClient: HttpClient) {}
+  constructor(private requestService: RequestService) {}
 
   /**
    * 從 assets/configs.json 取得設定值
    */
   public retrievingConfigsFromJson(): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
-      this.httpClient.get('/assets/configs.json').subscribe({
+      this.requestService.get<any>('/assets/configs.json').subscribe({
         next: (response) => {
           this.configFromJson = response;
           resolve(true);
