@@ -1,16 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
 import { IAlbum, Lightbox } from 'ngx-lightbox';
-import { lastValueFrom } from 'rxjs';
 import { BaseResponse } from 'src/app/abstracts/http-client';
 import { Account, RefreshTokenPayloads, SignInResponse, User } from 'src/app/abstracts/single-sign-on';
 import { TokenUser } from 'src/app/abstracts/single-sign-on';
-import { environment } from 'src/environments/environment';
 import { RequestService } from '../request-service/request.service';
 import { SecureLocalStorageService } from '../secure-local-storage/secure-local-storage.service';
 import { Buffer } from 'buffer';
+import { AppEnvironmentService } from '../app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Injectable({
   providedIn: 'root'
@@ -18,13 +17,12 @@ import { Buffer } from 'buffer';
 export class CommonService {
 
   private siteTitle = "洛嬉遊戲 L.S. Games";
-  private tokenVerified?: Date = undefined;
   constructor(
-    private route: ActivatedRoute,
     private titleService: Title,
     private lightbox: Lightbox,
     private secureLocalStorageService: SecureLocalStorageService,
-    private requestService: RequestService
+    private requestService: RequestService,
+    private appEnvironmentService: AppEnvironmentService
   ) { }
 
   /**
@@ -203,7 +201,8 @@ export class CommonService {
       throw new Error("重整權杖已過期");
     }
 
-    const uri = `${environment.ssoApiUri}/api/v1/user/token/refresh`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.SingleSignOn);
+    const uri = `${baseUri}/api/v1/user/token/refresh`;
     const header = { Authorization: `Bearer ${refreshToken}` };
     return new Promise<boolean>((resolve, reject) => {
       this.requestService.post<BaseResponse<SignInResponse>>(uri, undefined, undefined, header)
@@ -240,8 +239,9 @@ export class CommonService {
    * 取得使用者帳號資料
    * @param userInToken 權杖中的使用者帳號資料
    */
-  private setUserData(userInToken: TokenUser): void {
-    const uri = `${environment.ssoApiUri}/api/v1/user`;
+  private async setUserData(userInToken: TokenUser): Promise<void> {
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.SingleSignOn);
+    const uri = `${baseUri}/api/v1/user`;
     this.requestService.get<BaseResponse<Account>>(uri)
       .subscribe({
         next: response => {
@@ -262,7 +262,6 @@ export class CommonService {
     this.secureLocalStorageService.remove("refreshToken");
     this.secureLocalStorageService.remove("authVerified");
     this.secureLocalStorageService.remove("user");
-    this.tokenVerified = undefined;
   }
 
   /**

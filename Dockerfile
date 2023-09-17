@@ -7,8 +7,10 @@ RUN apk update && \
   apk add --no-cache \
     util-linux \
     openssl && \
-  npm install -g @angular/cli \
-  && npm install
+  echo "Install Angular cli ..." && \
+  npm install -g @angular/cli && \
+  echo "Install dependencies ..." && \
+  npm install
 
 COPY . .
 COPY src src
