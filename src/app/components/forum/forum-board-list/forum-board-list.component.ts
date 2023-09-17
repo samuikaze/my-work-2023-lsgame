@@ -58,7 +58,7 @@ export class ForumBoardListComponent implements OnInit {
    * @returns 完整圖片路徑
    */
   public composeImagePath(filename: string): string {
-    return `/assets/images/forums/boards/${filename}`;
+    return `assets/images/forums/boards/${filename}`;
   }
 
   /**
