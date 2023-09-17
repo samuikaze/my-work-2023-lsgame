@@ -15,7 +15,7 @@ export class AppEnvironmentService {
    */
   public retrievingConfigsFromJson(): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
-      this.requestService.get<any>('/assets/configs.json').subscribe({
+      this.requestService.get<any>('assets/configs.json').subscribe({
         next: (response) => {
           this.configFromJson = response;
           resolve(true);

@@ -102,6 +102,6 @@ export class GoodsListComponent implements OnInit {
    * @returns 商品預覽圖網址
    */
   public composePreviewImageUrl(image: string): string {
-    return `/assets/images/goods/${image}`;
+    return `assets/images/goods/${image}`;
   }
 }

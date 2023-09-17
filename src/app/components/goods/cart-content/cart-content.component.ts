@@ -129,7 +129,7 @@ export class CartContentComponent implements OnInit {
    */
   public composeImagePath(image?: string): string {
     if (image !== undefined) {
-      return `/assets/images/goods/${image}`;
+      return `assets/images/goods/${image}`;
     }
 
     return '';

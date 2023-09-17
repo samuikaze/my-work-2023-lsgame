@@ -25,7 +25,7 @@ spec:
           image: $secrets.REGISTRY_URL/lsgames-frontend:latest
           volumeMounts:
             - name: config-volume
-              mountPath: /usr/share/nginx/html/assets/config.json
+              mountPath: /usr/share/nginx/html/assets/configs.json
               subPath: config.json
           resources:
             requests:
