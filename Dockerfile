@@ -7,7 +7,7 @@ RUN npm install -g @angular/cli \
   && npm install
 
 COPY . .
-COPY src src
+# COPY src src
 
 RUN chmod +x ./.infrastructures/generate-secret-key.sh && \
   ng build -c production --base-href /forwork/lsgames/
