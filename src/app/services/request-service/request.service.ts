@@ -31,8 +31,8 @@ export class RequestService {
 
     const protocol = `${location.protocol}//`
     const hostname = location.host;
-    const path = location.pathname === '/' ? '' : location.pathname;
-    const uri = (originalUri.indexOf('/') === 0) ? `/${originalUri.substring(1)}` : originalUri;
+    const path = location.pathname;
+    const uri = (originalUri.indexOf('/') === 0) ? originalUri.substring(1) : originalUri;
 
     return `${protocol}${hostname}${path}${uri}`;
   }
