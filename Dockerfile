@@ -3,7 +3,11 @@ FROM node:alpine AS builder
 WORKDIR /usr/app
 
 COPY ./package*.json ./
-RUN npm install -g @angular/cli \
+RUN apk update && \
+  apk add --no-cache \
+    util-linux
+    openssl && \
+  npm install -g @angular/cli \
   && npm install
 
 COPY . .
