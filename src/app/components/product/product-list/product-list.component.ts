@@ -4,9 +4,10 @@ import { Platform, Product, ProductList, ProductType } from 'src/app/components/
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
-import { environment } from 'src/environments/environment';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
+import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Component({
     selector: 'app-product-list',
@@ -27,7 +28,8 @@ export class ProductListComponent implements OnInit {
   constructor(
     private commonService: CommonService,
     private requestService: RequestService,
-    private breadcrumbService: BreadcrumbService
+    private breadcrumbService: BreadcrumbService,
+    private appEnvironmentService: AppEnvironmentService
   ) { }
 
   ngOnInit(): void {
@@ -65,9 +67,10 @@ export class ProductListComponent implements OnInit {
    * 取得作品清單
    */
   private getProductList(): Promise<boolean> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       this.productsList = [];
-      const uri = `${environment.commonUri}/product`;
+      const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Common);
+      const uri = `${baseUri}/product`;
       const params = {page: this.page};
       this.requestService.get<ProductList>(uri, params)
         .subscribe({
@@ -88,9 +91,10 @@ export class ProductListComponent implements OnInit {
    * 取得作品分類清單
    */
   private getProductTypeList(): Promise<boolean> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       this.productTypeList = [];
-      const uri = `${environment.commonUri}/product/types`;
+      const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Common);
+      const uri = `${baseUri}/product/types`;
       this.requestService.get<Array<ProductType>>(uri)
         .subscribe({
           next: response => {
@@ -109,9 +113,10 @@ export class ProductListComponent implements OnInit {
    * 取得作品平台清單
    */
   private getProductPlatformList(): Promise<boolean> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       this.platformList = [];
-      const uri = `${environment.commonUri}/product/platforms`;
+      const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Common);
+      const uri = `${baseUri}/product/platforms`;
       this.requestService.get<Array<Platform>>(uri)
         .subscribe({
           next: response => {

@@ -6,9 +6,10 @@ import { News, NewsType } from 'src/app/components/news/news';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
-import { environment } from 'src/environments/environment';
 import { NewsListComponent } from '../news-list/news-list.component';
 import { NgIf, DatePipe } from '@angular/common';
+import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Component({
     selector: 'app-news-content',
@@ -31,6 +32,7 @@ export class NewsContentComponent implements OnInit {
     private commonService: CommonService,
     private requestService: RequestService,
     private breadcrumbService: BreadcrumbService,
+    private appEnvironmentService: AppEnvironmentService,
     @Inject(NewsListComponent) private newsListComponent: NewsListComponent
   ) { }
 
@@ -55,8 +57,9 @@ export class NewsContentComponent implements OnInit {
   /**
    * 取得所有消息種類
    */
-  private getNewsTypes(): void {
-    const uri = `${environment.commonUri}/news/types`;
+  private async getNewsTypes(): Promise<void> {
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Common);
+    const uri = `${baseUri}/news/types`;
     this.requestService.get<Array<NewsType>>(uri)
       .subscribe({
         next: response => {
@@ -89,7 +92,7 @@ export class NewsContentComponent implements OnInit {
   /**
    * 取得指定消息
    */
-  private getNews(): void {
+  private async getNews(): Promise<void> {
     this.loaded = false;
     this.news = undefined;
 
@@ -98,8 +101,9 @@ export class NewsContentComponent implements OnInit {
         this.composeApiPath();
       }
 
-      const URL = `${environment.commonUri}/${this.apiPath}`;
-      this.requestService.get<News>(URL)
+      const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Common);
+      const uri = `${baseUri}/${this.apiPath}`;
+      this.requestService.get<News>(uri)
         .subscribe({
           next: response => {
             this.news = response;

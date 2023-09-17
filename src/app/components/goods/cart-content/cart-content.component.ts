@@ -1,18 +1,17 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { Breadcrumb } from 'src/app/abstracts/common';
-import { BaseResponse } from 'src/app/abstracts/http-client';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CartService } from 'src/app/services/cart-service/cart.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
-import { environment } from 'src/environments/environment';
 import { GoodsListComponent } from '../goods-list/goods-list.component';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { NgIf, NgFor } from '@angular/common';
 import { Good } from '../good';
 import { Cart } from 'src/app/services/cart-service/cart-service';
-import { HttpErrorResponse } from '@angular/common/http';
+import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Component({
     selector: 'app-cart-content',
@@ -32,6 +31,7 @@ export class CartContentComponent implements OnInit {
     private requestService: RequestService,
     private cartService: CartService,
     private breadcrumbService: BreadcrumbService,
+    private appEnvironmentService: AppEnvironmentService,
     @Inject(GoodsListComponent) private goodListComponent: GoodsListComponent
   ) { }
 
@@ -74,11 +74,12 @@ export class CartContentComponent implements OnInit {
   /**
    * 取得購物車詳細資訊
    */
-  public getCartGoodDetails(): void {
+  public async getCartGoodDetails(): Promise<void> {
     const cartGoods = this.cartService.getCart();
     const body = { goods: cartGoods.map(good => good.id) };
 
-    const uri = `${environment.shopUri}/shop/goods`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Shop);
+    const uri = `${baseUri}/shop/goods`;
     this.requestService.post<Array<Good>>(uri, body)
       .subscribe(response => {
         this.goods = this.processGoodsFormat(response, cartGoods);

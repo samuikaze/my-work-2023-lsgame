@@ -5,9 +5,10 @@ import { BaseResponse } from 'src/app/abstracts/http-client';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
-import { environment } from 'src/environments/environment';
 import { RouterLink } from '@angular/router';
 import { NgIf, NgFor } from '@angular/common';
+import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Component({
     selector: 'app-forum-board-list',
@@ -25,7 +26,8 @@ export class ForumBoardListComponent implements OnInit {
   constructor(
     private commonService: CommonService,
     private requestService: RequestService,
-    private breadcrumbService: BreadcrumbService
+    private breadcrumbService: BreadcrumbService,
+    private appEnvironmentService: AppEnvironmentService
   ) { }
 
   ngOnInit(): void {
@@ -37,11 +39,12 @@ export class ForumBoardListComponent implements OnInit {
   /**
    * 取得討論板一覽
    */
-  public getBoards() {
+  public async getBoards() {
     this.loaded = false;
     this.boards = [];
 
-    const uri = `${environment.forumUri}/${this.apiPath}`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
+    const uri = `${baseUri}/${this.apiPath}`;
     this.requestService.get<BaseResponse<Board[]>>(uri)
       .subscribe(data => {
         this.boards = data.data;

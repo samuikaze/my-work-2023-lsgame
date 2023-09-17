@@ -8,11 +8,10 @@ import { UserInformation } from 'src/app/abstracts/single-sign-on';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
-import { environment } from 'src/environments/environment';
 import { ForumBoardListComponent } from '../forum-board-list/forum-board-list.component';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
-import { SecureLocalStorageService } from 'src/app/services/secure-local-storage/secure-local-storage.service';
-import { Buffer } from 'buffer';
+import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Component({
   selector: 'app-forum-post-list',
@@ -37,7 +36,7 @@ export class ForumPostListComponent implements OnInit {
     private commonService: CommonService,
     private requestService: RequestService,
     private breadcrumbService: BreadcrumbService,
-    private secureLocalStorageService: SecureLocalStorageService,
+    private appEnvironmentService: AppEnvironmentService,
     @Inject(ForumBoardListComponent)
     private forumBoardListComponent: ForumBoardListComponent
   ) {
@@ -68,11 +67,12 @@ export class ForumPostListComponent implements OnInit {
   /**
    * 取得文章清單
    */
-  public getBoardPosts() {
+  public async getBoardPosts() {
     this.loaded = false;
     this.posts = [];
 
-    const URL = `${environment.forumUri}/forums/boards/${this.boardId}`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
+    const URL = `${baseUri}/forums/boards/${this.boardId}`;
     this.requestService.get<BaseResponse<Post[]>>(URL).subscribe({
       next: (response) => {
         this.posts = response.data;
@@ -123,10 +123,11 @@ export class ForumPostListComponent implements OnInit {
   /**
    * 以使用者帳號 PK 取得帳號資訊
    */
-  public getUserNameByIds(id: Array<number>): void {
+  public async getUserNameByIds(id: Array<number>): Promise<void> {
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.SingleSignOn);
     this.requestService
       .post<BaseResponse<Array<UserInformation>>>(
-        `${environment.ssoApiUri}/api/v1/users`,
+        `${baseUri}/api/v1/users`,
         { id }
       )
       .subscribe({

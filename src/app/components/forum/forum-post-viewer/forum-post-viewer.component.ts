@@ -7,13 +7,14 @@ import { TokenUser } from 'src/app/abstracts/single-sign-on';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
-import { environment } from 'src/environments/environment';
 import { ForumBoardListComponent } from '../forum-board-list/forum-board-list.component';
 import { ForumPostListComponent } from '../forum-post-list/forum-post-list.component';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ForumPostViewerStatus, Modals } from './forum-post-viewer';
 import { Modal } from 'bootstrap';
+import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Component({
     selector: 'app-forum-post-viewer',
@@ -45,6 +46,7 @@ export class ForumPostViewerComponent implements OnInit {
     private commonService: CommonService,
     private requestService: RequestService,
     private breadcrumbService: BreadcrumbService,
+    private appEnvironmentService: AppEnvironmentService,
     private router: Router,
     @Inject(ForumBoardListComponent) private forumBoardListComponent: ForumBoardListComponent,
     @Inject(ForumPostListComponent) private forumPostListComponent: ForumPostListComponent
@@ -136,11 +138,12 @@ export class ForumPostViewerComponent implements OnInit {
   /**
    * 取得文章本體
    */
-  private getPost() {
+  private async getPost() {
     this.postLoaded = false;
     this.post = undefined;
 
-    const uri = `${environment.forumUri}/forums/boards/${this.boardId}/posts/${this.postId}`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
+    const uri = `${baseUri}/forums/boards/${this.boardId}/posts/${this.postId}`;
     this.requestService.get<BaseResponse<Post>>(uri)
       .subscribe({
         next: response => {
@@ -157,11 +160,12 @@ export class ForumPostViewerComponent implements OnInit {
   /**
    * 取得文章底下的回應
    */
-  private getReplies() {
+  private async getReplies() {
     this.repliesLoaded = false;
     this.replies = [];
 
-    const uri = `${environment.forumUri}/forums/boards/${this.boardId}/posts/${this.postId}/replies`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
+    const uri = `${baseUri}/forums/boards/${this.boardId}/posts/${this.postId}/replies`;
     const params = {
       page: this.page
     };
@@ -217,10 +221,11 @@ export class ForumPostViewerComponent implements OnInit {
   /**
    * 刪除文章
    */
-  public fireDeletePost(): void {
+  public async fireDeletePost(): Promise<void> {
     this.statuses.deleting = true;
 
-    const uri = `${environment.forumUri}/forums/boards/${this.boardId}/post/${this.postId}`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
+    const uri = `${baseUri}/forums/boards/${this.boardId}/post/${this.postId}`;
     this.requestService.delete<BaseResponse<null>>(uri)
       .subscribe({
         next: () => {
@@ -239,14 +244,15 @@ export class ForumPostViewerComponent implements OnInit {
   /**
    * 刪除回應
    */
-  public fireDeleteReply(): void {
+  public async fireDeleteReply(): Promise<void> {
     if (this.selectedReplyId == undefined) {
       return;
     }
 
     this.statuses.deleting = true;
 
-    const uri = `${environment.forumUri}/forums/boards/${this.boardId}/post/${this.postId}/reply/${this.selectedReplyId}`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
+    const uri = `${baseUri}/forums/boards/${this.boardId}/post/${this.postId}/reply/${this.selectedReplyId}`;
     this.requestService.delete<BaseResponse<null>>(uri)
       .subscribe({
         next: () => {

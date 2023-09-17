@@ -2,16 +2,16 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, Inject, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Breadcrumb } from 'src/app/abstracts/common';
-import { BaseResponse } from 'src/app/abstracts/http-client';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CartService } from 'src/app/services/cart-service/cart.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
-import { environment } from 'src/environments/environment';
 import { GoodsListComponent } from '../goods-list/goods-list.component';
 import { NgIf } from '@angular/common';
 import { Good } from '../good';
 import { Cart } from 'src/app/services/cart-service/cart-service';
+import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Component({
     selector: 'app-goods-content',
@@ -36,6 +36,7 @@ export class GoodsContentComponent implements OnInit {
     private requestService: RequestService,
     private cartService: CartService,
     private breadcrumbService: BreadcrumbService,
+    private appEnvironmentService: AppEnvironmentService,
     @Inject(GoodsListComponent) private goodListComponent: GoodsListComponent
   ) { }
 
@@ -124,11 +125,12 @@ export class GoodsContentComponent implements OnInit {
   /**
    * 取得商品資料
    */
-  public getGood() {
+  public async getGood() {
     this.loaded = false;
     this.good = undefined;
 
-    const uri = `${environment.shopUri}/${this.apiPath}`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Shop);
+    const uri = `${baseUri}/${this.apiPath}`;
     this.requestService.get<Good>(uri)
       .subscribe({
         next: response => {

@@ -7,13 +7,14 @@ import { BaseResponse } from 'src/app/abstracts/http-client';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
-import { environment } from 'src/environments/environment';
 import { ForumBoardListComponent } from '../forum-board-list/forum-board-list.component';
 import { ForumPostListComponent } from '../forum-post-list/forum-post-list.component';
 import { ForumPostViewerComponent } from '../forum-post-viewer/forum-post-viewer.component';
 import { FormsModule } from '@angular/forms';
 import { NgIf, NgFor } from '@angular/common';
 import { CKEditorModule } from 'ckeditor4-angular';
+import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Component({
   selector: 'app-forum-post-editor',
@@ -47,6 +48,7 @@ export class ForumPostEditorComponent implements OnInit {
     private commonService: CommonService,
     private requestService: RequestService,
     private breadcrumbService: BreadcrumbService,
+    private appEnvironmentService: AppEnvironmentService,
     @Inject(ForumBoardListComponent)
     private forumBoardListComponent: ForumBoardListComponent,
     @Inject(ForumPostListComponent)
@@ -134,11 +136,12 @@ export class ForumPostEditorComponent implements OnInit {
   /**
    * 取得文章分類清單
    */
-  private getPostTypes() {
+  private async getPostTypes() {
     this.categoriesLoaded = false;
     this.categories = [];
 
-    const URL = `${environment.forumUri}/forums/commons/post/types`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
+    const URL = `${baseUri}/forums/commons/post/types`;
     this.requestService.get<BaseResponse<Category[]>>(URL).subscribe((data) => {
       this.categories = data.data;
       this.categoriesLoaded = true;
@@ -148,7 +151,7 @@ export class ForumPostEditorComponent implements OnInit {
   /**
    * 取得文章資料
    */
-  private getPost() {
+  private async getPost() {
     this.postLoaded = false;
     this.postModel = {
       title: '',
@@ -156,7 +159,8 @@ export class ForumPostEditorComponent implements OnInit {
       content: '',
     };
 
-    const URL = `${environment.forumUri}/forums/boards/${this.boardId}/posts/${this.postId}`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
+    const URL = `${baseUri}/forums/boards/${this.boardId}/posts/${this.postId}`;
     this.requestService.get<BaseResponse<Post>>(URL).subscribe((data) => {
       this.postModel.title = data.data.title;
       this.postModel.category = data.data.category_id;
@@ -168,7 +172,7 @@ export class ForumPostEditorComponent implements OnInit {
   /**
    * 發布文章或更新文章
    */
-  public submitPost() {
+  public async submitPost() {
     if (!this.isPostSubmitable()) {
       alert('請確認所有欄位是否都有填完');
       throw new Error('請確認所有欄位是否都有填完');
@@ -179,11 +183,12 @@ export class ForumPostEditorComponent implements OnInit {
 
     let url = '';
     let client = undefined;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
     if (this.postId !== undefined) {
-      url = `${environment.forumUri}/forums/boards/${this.boardId}/post/${this.postId}`;
+      url = `${baseUri}/forums/boards/${this.boardId}/post/${this.postId}`;
       client = this.requestService.patch<BaseResponse<null>>(url, POST);
     } else {
-      url = `${environment.forumUri}/forums/boards/${this.boardId}/posts`;
+      url = `${baseUri}/forums/boards/${this.boardId}/posts`;
       client = this.requestService.post<BaseResponse<null>>(url, POST);
     }
 

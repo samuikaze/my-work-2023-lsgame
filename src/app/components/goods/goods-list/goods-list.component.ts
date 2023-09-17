@@ -1,16 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { Breadcrumb } from 'src/app/abstracts/common';
-import { BaseResponse } from 'src/app/abstracts/http-client';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CartService } from 'src/app/services/cart-service/cart.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
-import { environment } from 'src/environments/environment';
 import { RouterLink } from '@angular/router';
 import { NgIf, NgFor } from '@angular/common';
 import { Good } from '../good';
 import { Cart } from 'src/app/services/cart-service/cart-service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Component({
     selector: 'app-goods-list',
@@ -30,7 +30,8 @@ export class GoodsListComponent implements OnInit {
     private commonService: CommonService,
     private requestService: RequestService,
     private cartService: CartService,
-    private breadcrumbService: BreadcrumbService
+    private breadcrumbService: BreadcrumbService,
+    private appEnvironmentService: AppEnvironmentService
   ) { }
 
   ngOnInit(): void {
@@ -43,11 +44,12 @@ export class GoodsListComponent implements OnInit {
   /**
    * 取得商品清單
    */
-  public getGoods() {
+  public async getGoods() {
     this.loaded = false;
     this.goods = [];
 
-    const uri = `${environment.shopUri}/shop/goods`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Shop);
+    const uri = `${baseUri}/shop/goods`;
     this.requestService.get<Array<Good>>(uri)
       .subscribe({
         next: response => {

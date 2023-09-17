@@ -3,11 +3,12 @@ import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrum
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
 import { News, NewsList, NewsType } from '../news/news';
-import { environment } from 'src/environments/environment';
 import { HttpErrorResponse } from '@angular/common/http';
 import { HomeStatus } from './home';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Component({
   selector: 'app-home',
@@ -26,6 +27,7 @@ export class HomeComponent implements OnInit {
     private commonService: CommonService,
     private requestService: RequestService,
     private breadcrumbService: BreadcrumbService,
+    private appEnvironmentService: AppEnvironmentService,
     private router: Router
   ) {}
 
@@ -54,10 +56,11 @@ export class HomeComponent implements OnInit {
    * 取得消息一覽
    */
   private getNews(): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<boolean>(async (resolve, reject) => {
       this.newsList = [];
 
-      const uri = `${environment.commonUri}/news`;
+      const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Common);
+      const uri = `${baseUri}/news`;
       const params = { page: 1 };
       this.requestService.get<NewsList>(uri, params)
         .subscribe({
@@ -77,8 +80,9 @@ export class HomeComponent implements OnInit {
    * 取的所有消息種類
    */
   private getNewsTypes(): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      const uri = `${environment.commonUri}/news/types`;
+    return new Promise<boolean>(async (resolve, reject) => {
+      const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Common);
+      const uri = `${baseUri}/news/types`;
       this.requestService.get<Array<NewsType>>(uri)
         .subscribe({
           next: (response) => {

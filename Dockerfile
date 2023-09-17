@@ -9,12 +9,13 @@ RUN npm install -g @angular/cli \
 COPY . .
 COPY src src
 
-RUN ng build -c production --base-href /template/
+RUN chmod +x ./.infrastructures/generate-secret-key.sh \
+  ng build -c production --base-href /forwork/lsgames/
 
 FROM nginx:alpine
 
 COPY --from=builder /usr/app/dist/frontend /usr/share/nginx/html
-COPY ./nginx-configuration.conf /etc/nginx/conf.d/default.conf
+COPY ./.infrastructures/nginx-configuration.conf /etc/nginx/conf.d/default.conf
 
 RUN find /usr/share/nginx/html -type f -exec chmod 644 {} \; \
   && find /usr/share/nginx/html -type d -exec chmod 755 {} \; \

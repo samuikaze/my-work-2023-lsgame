@@ -7,13 +7,14 @@ import { BaseResponse } from 'src/app/abstracts/http-client';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
-import { environment } from 'src/environments/environment';
 import { ForumBoardListComponent } from '../forum-board-list/forum-board-list.component';
 import { ForumPostListComponent } from '../forum-post-list/forum-post-list.component';
 import { ForumPostViewerComponent } from '../forum-post-viewer/forum-post-viewer.component';
 import { CKEditorModule } from 'ckeditor4-angular';
 import { FormsModule } from '@angular/forms';
 import { NgIf } from '@angular/common';
+import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Component({
     selector: 'app-forum-reply-editor',
@@ -43,6 +44,7 @@ export class ForumReplyEditorComponent implements OnInit {
     private commonService: CommonService,
     private requestService: RequestService,
     private breadcrumbService: BreadcrumbService,
+    private appEnvironmentService: AppEnvironmentService,
     @Inject(ForumBoardListComponent) private forumBoardListComponent: ForumBoardListComponent,
     @Inject(ForumPostListComponent) private forumPostListComponent: ForumPostListComponent,
     @Inject(ForumPostViewerComponent) private forumPostViewerComponent: ForumPostViewerComponent
@@ -80,7 +82,7 @@ export class ForumReplyEditorComponent implements OnInit {
     return this.replyLoaded;
   }
 
-  public submitReply() {
+  public async submitReply() {
     if (!this.isReplySubmitable()) {
       alert("請確認所有欄位是否都有填完");
       throw new Error("請確認所有欄位是否都有填完");
@@ -89,11 +91,12 @@ export class ForumReplyEditorComponent implements OnInit {
     this.submitting = true;
     let url = "";
     let client = undefined;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
     if (this.replyId !== undefined) {
-      url = `${environment.forumUri}/forums/boards/${this.boardId}/post/${this.postId}/reply/${this.replyId}`;
+      url = `${baseUri}/forums/boards/${this.boardId}/post/${this.postId}/reply/${this.replyId}`;
       client = this.requestService.patch<BaseResponse<null>>(url, this.replyModel);
     } else {
-      url = `${environment.forumUri}/forums/boards/${this.boardId}/post/${this.postId}/replies`;
+      url = `${baseUri}/forums/boards/${this.boardId}/post/${this.postId}/replies`;
       client = this.requestService.post<BaseResponse<null>>(url, this.replyModel);
     }
 
@@ -169,13 +172,14 @@ export class ForumReplyEditorComponent implements OnInit {
   /**
    * 取得文章資料
    */
-  private getReply() {
+  private async getReply() {
     this.replyLoaded = false;
     this.replyModel.title = "";
     this.replyModel.content = "";
 
-    const URL = `${environment.forumUri}/forums/boards/${this.boardId}/posts/${this.postId}/replies/${this.replyId}`;
-    this.requestService.get<BaseResponse<ReplyEdit>>(URL)
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
+    const uri = `${baseUri}/forums/boards/${this.boardId}/posts/${this.postId}/replies/${this.replyId}`;
+    this.requestService.get<BaseResponse<ReplyEdit>>(uri)
       .subscribe(data => {
         this.replyModel.title = data.data.title;
         this.replyModel.content = data.data.content;

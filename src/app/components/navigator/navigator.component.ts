@@ -13,7 +13,6 @@ import { TokenUser } from 'src/app/abstracts/single-sign-on';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
 import { SecureLocalStorageService } from 'src/app/services/secure-local-storage/secure-local-storage.service';
-import { environment } from 'src/environments/environment';
 import { Modal } from 'bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonService } from 'src/app/services/common-service/common.service';
@@ -22,6 +21,8 @@ import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf, DatePipe, AsyncPipe } from '@angular/common';
 import { Buffer } from 'buffer';
 import { TokenType } from 'src/app/enums/token-type';
+import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Component({
   selector: 'app-navigator',
@@ -80,7 +81,8 @@ export class NavigatorComponent implements OnInit {
     private breadcrumbService: BreadcrumbService,
     private requestService: RequestService,
     private secureLocalStorageService: SecureLocalStorageService,
-    private commonService: CommonService
+    private commonService: CommonService,
+    private appEnvironmentService: AppEnvironmentService
   ) {}
 
   ngOnInit(): void {
@@ -89,7 +91,7 @@ export class NavigatorComponent implements OnInit {
         this.getBreadcrumb();
         this.getLoginStatus()
           .then(() => this.checkAuthenticateStatus())
-          .then(() => (this.adminPanelUri = this.getAdminPanelUri()));
+          .then(() => (this.getAdminPanelUri().then(response => this.adminPanelUri = response)));
       }
     });
   }
@@ -186,7 +188,7 @@ export class NavigatorComponent implements OnInit {
   /**
    * 註冊
    */
-  public fireSignUp(): void {
+  public async fireSignUp(): Promise<void> {
     if (
       this.signUp.account.length == 0 ||
       this.signUp.password.length == 0 ||
@@ -200,7 +202,8 @@ export class NavigatorComponent implements OnInit {
 
     this.statuses.signUping = true;
 
-    const url = `${environment.ssoApiUri}/api/v1/user/signup`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.SingleSignOn);
+    const url = `${baseUri}/api/v1/user/signup`;
     this.requestService
       .post<BaseResponse<SignInResponse>>(url, this.signUp)
       .subscribe({
@@ -251,7 +254,7 @@ export class NavigatorComponent implements OnInit {
   /**
    * 登入
    */
-  public fireSignIn(): void {
+  public async fireSignIn(): Promise<void> {
     this.statuses.logining = true;
     this.signInError = '';
 
@@ -261,7 +264,8 @@ export class NavigatorComponent implements OnInit {
       return;
     }
 
-    const url = `${environment.ssoApiUri}/api/v1/user/signin`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.SingleSignOn);
+    const url = `${baseUri}/api/v1/user/signin`;
     this.requestService
       .post<BaseResponse<SignInResponse>>(url, this.signIn)
       .subscribe({
@@ -316,8 +320,9 @@ export class NavigatorComponent implements OnInit {
    * 取得使用者帳號資料
    * @param userInToken 權杖中的使用者帳號資料
    */
-  private getUserData(userInToken: TokenUser): void {
-    const uri = `${environment.ssoApiUri}/api/v1/user`;
+  private async getUserData(userInToken: TokenUser): Promise<void> {
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.SingleSignOn);
+    const uri = `${baseUri}/api/v1/user`;
     this.requestService.get<BaseResponse<Account>>(uri).subscribe({
       next: (response) => {
         const user = Object.assign(userInToken, response.data) as User;
@@ -334,13 +339,14 @@ export class NavigatorComponent implements OnInit {
   /**
    * 登出
    */
-  public fireSignOut(): void {
+  public async fireSignOut(): Promise<void> {
     this.statuses.loaded = false;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.SingleSignOn);
 
     if (Object.keys(this.user).length > 0) {
       const accessToken = this.secureLocalStorageService.get('accessToken');
       if (accessToken !== null) {
-        const url = `${environment.ssoApiUri}/api/v1/user/signout`;
+        const url = `${baseUri}/api/v1/user/signout`;
         const header = { Authorization: `Bearer ${accessToken}` };
         this.requestService
           .post<BaseResponse<null>>(url, undefined, undefined, header)
@@ -509,8 +515,9 @@ export class NavigatorComponent implements OnInit {
    * 取得後台管理網址
    * @returns 後台管理網址
    */
-  public getAdminPanelUri(): string {
+  public async getAdminPanelUri(): Promise<string> {
     const accessToken = this.secureLocalStorageService.get('accessToken');
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.BackStage);
 
     if (accessToken != null) {
       const data = this.secureLocalStorageService.encrypt(accessToken);
@@ -519,7 +526,7 @@ export class NavigatorComponent implements OnInit {
         .replace(/\+/g, '-')
         .replace(/\//g, '_');
 
-      return `${environment.backStage}/?token=${token}`;
+      return `${baseUri}/?token=${token}`;
     }
 
     return '';
@@ -532,15 +539,16 @@ export class NavigatorComponent implements OnInit {
    * @param folder 資料夾名稱，僅有檔案儲存服務會有
    * @returns 完整網址
    */
-  public getImageUrl(
+  public async getImageUrl(
     type: 'fileStorage' | 'dataurl',
     filename: string,
     folder?: string
-  ): string {
+  ): Promise<string> {
     let url = '';
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.FileStorageService);
     switch (type) {
       case 'fileStorage':
-        url += `${environment.fileStorageServiceUri}/`;
+        url += `${baseUri}/`;
         if (
           folder !== undefined &&
           folder !== null &&
@@ -610,7 +618,7 @@ export class NavigatorComponent implements OnInit {
   /**
    * 更新使用者帳號資料
    */
-  public fireUpdateUser(): void {
+  public async fireUpdateUser(): Promise<void> {
     if (!this.canFireUpdateUser()) {
       return;
     }
@@ -634,7 +642,8 @@ export class NavigatorComponent implements OnInit {
       passwordConfirmation: passwordConfirmation,
     };
 
-    const uri = `${environment.ssoApiUri}/api/v1/user/update`;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.SingleSignOn);
+    const uri = `${baseUri}/api/v1/user/update`;
     this.requestService.post<BaseResponse<UpdateUserResponse>>(uri, body)
       .subscribe({
         next: response => {
