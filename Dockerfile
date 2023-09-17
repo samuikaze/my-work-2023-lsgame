@@ -10,6 +10,7 @@ COPY . .
 COPY src src
 
 RUN chmod +x ./.infrastructures/generate-secret-key.sh && \
+  /bin/ash ./.infrastructures/generate-secret-key.sh
   ng build -c production --base-href /forwork/lsgames/
 
 FROM nginx:alpine
