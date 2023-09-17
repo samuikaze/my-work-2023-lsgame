@@ -13,7 +13,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: lsgames-frontend-runner
+    runs-on: ubuntu-latest
     # 上面已經宣告何時執行了，這邊可以不用再次宣告
     # main branch only
     # if: github.ref == 'refs/heads/main'
@@ -59,7 +59,7 @@ jobs:
     name: Deploy
     # 必須先執行過 build 動作才可以執行 Deploy 動作
     needs: [ build ]
-    runs-on: lsgames-frontend-runner
+    runs-on: ubuntu-latest
     steps:
       # 若是使用 self-hosted 的 runner，需額外安裝 kubectl，請將下面的註解打開
       - name: Install kubectl
