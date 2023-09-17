@@ -30,6 +30,10 @@ jobs:
       uses: docker/setup-buildx-action@v1
       with:
         driver: docker
+    # 取代加密金鑰
+    - name: Replace cipher secret key to environment.ts
+      run: |
+        sed -i 's/$secrets.CIPHER_SECRET_KEY/${{ secrets.CIPHER_SECRET_KEY }}/g' ./.infrastructures/environment.prod.ts
     - name: Build the Docker image
       # secrets.REGISTRY_URL 為映像檔伺服器的 URL
       # vars.APP_NAME 為應用程式的名稱，也就是這個映像檔的名稱
