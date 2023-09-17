@@ -16,9 +16,17 @@ spec:
       labels:
         app: lsgames-frontend
     spec:
+      volumes:
+        - name: config-volume
+          configMap:
+            name: lsgames-frontend-configs
       containers:
         - name: lsgames-frontend
           image: $secrets.REGISTRY_URL/lsgames-frontend:latest
+          volumeMounts:
+            - name: config-volume
+              mountPath: /usr/share/nginx/html/assets/config.json
+              subPath: config.json
           resources:
             requests:
               memory: 512Mi
