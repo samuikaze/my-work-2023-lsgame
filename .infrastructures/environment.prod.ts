@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  secretKey: "",
+  secretKey: "$secrets.CIPHER_SECRET_KEY",
 };
