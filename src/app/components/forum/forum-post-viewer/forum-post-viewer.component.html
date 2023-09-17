@@ -62,10 +62,17 @@
               >
                 編輯
               </a>
-              | 刪除
+              |
+              <a (click)="operationModal('confirmDeletePostModal', 'open')" class="cursor-pointer text-white text-decoration-none">
+                刪除
+              </a>
               <!-- | 大 中 小 -->
             </div>
           </div>
+          <div class="col-12">
+            <h3>{{ post.title }}</h3>
+          </div>
+          <hr />
           <div class="col-12" [innerHtml]="post.content"></div>
         </div>
       </div>
@@ -99,10 +106,17 @@
                 >
                   編輯
                 </a>
-                | 刪除
+                |
+                <a (click)="setSelectedReplyId(reply.id); operationModal('confirmDeleteReplyModal', 'open')" class="cursor-pointer text-white text-decoration-none">
+                  刪除
+                </a>
                 <!-- | 大 中 小 -->
               </div>
             </div>
+            <div class="col-12" *ngIf="isReplyTitleExists(reply.title)">
+              <h3>{{ reply.title }}</h3>
+            </div>
+            <hr *ngIf="isReplyTitleExists(reply.title)" />
             <div class="col-12" [innerHtml]="reply.content"></div>
           </div>
         </div>
@@ -124,6 +138,50 @@
           </li>
         </ul>
       </nav>
+    </div>
+  </div>
+</div>
+
+<!-- 刪除文章確認視窗 -->
+<div class="modal fade" id="confirmDeletePostModal" tabindex="-1" aria-labelledby="confirmDeletePostModal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="confirmDeletePostModal">系統確認</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        您確定要刪除這篇文章嗎？<span class="text-bold">此操作將無法被復原！</span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-danger" (click)="fireDeletePost()" [disabled]="statuses.deleting">
+          <span class="spinner-border spinner-border-sm" aria-hidden="true" *ngIf="statuses.deleting"></span>
+          {{ statuses.deleting ? "刪除中..." : "確認刪除" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 刪除回應確認視窗 -->
+<div class="modal fade" id="confirmDeleteReplyModal" tabindex="-1" aria-labelledby="confirmDeleteReplyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="confirmDeleteReplyModalLabel">系統確認</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        您確定要刪除這則回應嗎？<span class="text-bold">此操作將無法被復原！</span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-danger" (click)="fireDeleteReply()" [disabled]="statuses.deleting">
+          <span class="spinner-border spinner-border-sm" aria-hidden="true" *ngIf="statuses.deleting"></span>
+          {{ statuses.deleting ? "刪除中..." : "確認刪除" }}
+        </button>
+      </div>
     </div>
   </div>
 </div>

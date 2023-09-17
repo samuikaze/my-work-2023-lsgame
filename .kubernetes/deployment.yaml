@@ -2,23 +2,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: <APPLICATION_NAME>
+  name: lsgames-frontend
   labels:
-    app: <APPLICATION_NAME>
-  namespace: <NAMESPACE>
+    app: lsgames-frontend
+  namespace: smkz-for-work
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: <APPLICATION_NAME>
+      app: lsgames-frontend
   template:
     metadata:
       labels:
-        app: <APPLICATION_NAME>
+        app: lsgames-frontend
     spec:
       containers:
-        - name: <APPLICATION_NAME>
-          image: <REGISTRY_URL>/<IMAGE_NAME>:latest
+        - name: lsgames-frontend
+          image: $secrets.REGISTRY_URL/lsgames-frontend:latest
           resources:
             requests:
               memory: 512Mi
@@ -35,12 +35,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: <APPLICATION_NAME>
-  namespace: <NAMESPACE>
+  name: lsgames-frontend
+  namespace: smkz-for-work
 spec:
   type: ClusterIP
   selector:
-    app: <APPLICATION_NAME>
+    app: lsgames-frontend
   ports:
     - protocol: TCP
       port: 80

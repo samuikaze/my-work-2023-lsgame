@@ -60,22 +60,24 @@ export class RequestService {
   /**
    * 處理請求失敗
    * @param error 請求失敗資料
-   * @return 可觀察物件
-   * @deprecated
    */
-  private requestFailedHandler(error: HttpErrorResponse) {
+  public requestFailedHandler(error: HttpErrorResponse): void {
+    console.error(error);
+
     if (error.status === 0) {
       // 客戶端網路錯誤
-      console.error('請求過程中發生錯誤:', error.error);
-    } else {
-      // 後端返回的錯誤
-      console.error(
-        `發生 ${error.status} 錯誤, 異常資料為: `, error.error
-      );
+      console.error(`請求過程中發生錯誤: ${error.message}`);
     }
 
-    alert(error.error.message);
-    return throwError(() => new Error('請求發生錯誤，請稍後再重試一次'));
+    const errorMessage = (error.error.message == null) ? error.message : error.error.message;
+
+    if (error.status >= 400 && error.status < 500) {
+      alert(`給定的資料有誤，訊息為: ${errorMessage}`)
+    }
+
+    if (error.status >= 500) {
+      alert('系統內部發生錯誤，請聯絡管理員處理');
+    }
   }
 
   /**

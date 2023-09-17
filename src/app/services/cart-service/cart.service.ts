@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Cart, BackendCart } from 'src/app/abstracts/goods';
 import { BaseResponse } from 'src/app/abstracts/http-client';
 import { environment } from 'src/environments/environment';
 import { RequestService } from '../request-service/request.service';
+import { BackendCart, Cart } from './cart-service';
 
 @Injectable({
   providedIn: 'root'
@@ -142,31 +142,5 @@ export class CartService {
       .reduce((a, b) => a + b);
 
     return PRICES;
-  }
-
-  /**
-   * 儲存購物車
-   */
-   public saveCart(): void {
-    const url = `${environment.backendUri}/goods/cart/save`;
-    const data: BackendCart[] = this.cart.map(good => {
-      return {
-        id: good.id,
-        quantity: good.quantity,
-        price: good.prices
-      };
-    });
-
-    this.requestService.post<BaseResponse<[]>>(url, { cart: data })
-      .subscribe();
-  }
-
-  /**
-   * 移除儲存的購物車
-   */
-  public removeSavedCart(): void {
-    const url = `${environment.backendUri}/goods/cart/${1}`;
-    this.requestService.post<BaseResponse<null>>(url, { _method: "delete" })
-      .subscribe();
   }
 }

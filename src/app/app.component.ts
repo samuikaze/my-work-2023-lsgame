@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FooterComponent } from './layouts/base/footer/footer.component';
 import { BodyComponent } from './layouts/base/body/body.component';
 import { NavigatorComponent } from './components/navigator/navigator.component';
 import { HeaderComponent } from './layouts/base/header/header.component';
 import 'bootstrap/dist/js/bootstrap.bundle.js'
+import { AppEnvironmentService } from './services/app-environment-service/app-environment.service';
 
 @Component({
     selector: 'app-root',
@@ -12,6 +13,12 @@ import 'bootstrap/dist/js/bootstrap.bundle.js'
     standalone: true,
     imports: [HeaderComponent, NavigatorComponent, BodyComponent, FooterComponent]
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'lsgames-frontend';
+
+  constructor(private appEnvironmentService: AppEnvironmentService) {}
+
+  ngOnInit(): void {
+    this.appEnvironmentService.retrievingConfigsFromJson();
+  }
 }

@@ -83,42 +83,17 @@
       </h1>
       <table class="table news-table">
         <tbody>
-          <tr>
-            <td>2022-07-31</td>
-            <td>測試公告2</td>
-          </tr>
-          <tr>
-            <td>2022-07-30</td>
-            <td>測試公告1</td>
+          <tr *ngFor="let news of newsList">
+            <td>{{ news.createdAt | date: "yyyy-MM-dd" }}</td>
+            <td><span class="badge bg-primary">{{ getNewsTypeById(news.newsTypeId) }}</span></td>
+            <td>
+              <a [routerLink]="getNewsLink(news.newsId)" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">{{ news.newsTitle }}</a></td>
           </tr>
         </tbody>
       </table>
-    </div>
-    <div class="col-12 mb-5">
-      <h1 class="big-title">
-        Products
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
-          class="bi bi-chevron-double-right" viewBox="0 0 16 16">
-          <path fill-rule="evenodd"
-            d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708z" />
-          <path fill-rule="evenodd"
-            d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708z" />
-        </svg>
-      </h1>
-      <table class="table table-borderless text-center">
-        <tbody>
-          <tr>
-            <td>Not on sale</td>
-            <td>Not on sale</td>
-            <td>Not on sale</td>
-          </tr>
-          <tr>
-            <td>Not on sale</td>
-            <td>Not on sale</td>
-            <td>Not on sale</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="text-center">
+        <button class="btn btn-success" type="button" (click)="navigate('news')">檢視更多最新消息</button>
+      </div>
     </div>
     <div class="col-12">
       <h1 class="big-title">

@@ -33,9 +33,9 @@
         </div>
       <div class="col-4" *ngFor="let good of goods">
         <div class="card">
-          <a [routerLink]="composeDetailUrl(good.id)">
+          <a [routerLink]="composeDetailUrl(good.goodId)">
             <img
-              [src]="composePreviewImageUrl(good.preview_image)"
+              [src]="composePreviewImageUrl(good.previewImagee)"
               class="card-img-top"
               alt="商品圖"
             />
@@ -50,7 +50,7 @@
             <p class="card-text" [innerHtml]="good.description"></p>
             <div class="text-center">
               <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-                <a class="btn btn-success" [routerLink]="composeDetailUrl(good.id)">週邊詳細</a>
+                <a class="btn btn-success" [routerLink]="composeDetailUrl(good.goodId)">週邊詳細</a>
                 <button type="button" class="btn btn-info" (click)="addToCart(good, 1)">加入購物車</button>
               </div>
             </div>

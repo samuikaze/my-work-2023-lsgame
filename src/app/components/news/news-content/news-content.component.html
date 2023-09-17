@@ -23,13 +23,13 @@
     <div class="col-md-10 mt-3" style="float:unset; margin: 0 auto;" *ngIf="loaded && news !== undefined">
       <div class="news-view">
         <div class="news-time">
-          {{ news.created_at | date: "yyyy-MM-dd HH:mm:ss" }}&nbsp;・&nbsp;
-          <span class="badge bg-primary">{{ news.type }}</span>
+          {{ news.createdAt | date: "yyyy-MM-dd HH:mm:ss" }}&nbsp;・&nbsp;
+          <span class="badge bg-primary">{{ getNewsTypeById(news.newsTypeId) }}</span>
         </div>
-        <h2 class="news-title">{{ news.title }}</h2>
+        <h2 class="news-title">{{ news.newsTitle }}</h2>
       </div>
       <hr />
-      <div class="news-content" [innerHtml]="news.content"></div>
+      <div class="news-content" [innerHtml]="news.newsContent"></div>
       <div class="container-fluid text-center" style="margin: 3em 0 0 0;">
         <a routerLink="/news" class="btn btn-lg btn-success">返回消息列表</a>
       </div>
