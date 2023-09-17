@@ -119,7 +119,7 @@ export class GoodsContentComponent implements OnInit {
    * @returns 圖片路徑
    */
   public composeGoodImagePath(filename: string): string {
-    return `/assets/images/goods/${filename}`;
+    return `assets/images/goods/${filename}`;
   }
 
   /**
