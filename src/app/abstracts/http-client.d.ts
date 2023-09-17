@@ -15,4 +15,3 @@ export declare interface CustomerHeaders {
 export declare interface RequestBody {
   [key: string]: any;
 }
-

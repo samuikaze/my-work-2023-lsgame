@@ -5,11 +5,12 @@ import { ActivatedRoute } from '@angular/router';
 import { IAlbum, Lightbox } from 'ngx-lightbox';
 import { lastValueFrom } from 'rxjs';
 import { BaseResponse } from 'src/app/abstracts/http-client';
-import { SignInResponse } from 'src/app/abstracts/single-sign-on';
-import { User } from 'src/app/abstracts/single-sign-on';
+import { Account, RefreshTokenPayloads, SignInResponse, User } from 'src/app/abstracts/single-sign-on';
+import { TokenUser } from 'src/app/abstracts/single-sign-on';
 import { environment } from 'src/environments/environment';
 import { RequestService } from '../request-service/request.service';
 import { SecureLocalStorageService } from '../secure-local-storage/secure-local-storage.service';
+import { Buffer } from 'buffer';
 
 @Injectable({
   providedIn: 'root'
@@ -45,7 +46,7 @@ export class CommonService {
    * @param num 要返回的個數
    * @returns 處理後的值
    */
-  public processDateTime(raw: string, num: number): string {
+  public processDateTime(raw: string | Date, num: number): string {
     if (num > 6) {
       num = 6;
     } else if (num < 0) {
@@ -116,62 +117,67 @@ export class CommonService {
   }
 
   /**
+   * 確認目前登入狀態 (離線驗證)
+   * @returns 是否為登入狀態
+   */
+  public checkAuthenticateStateOffline(): boolean {
+    const userJson = this.secureLocalStorageService.get('user') || "";
+    const accessToken = this.secureLocalStorageService.get('accessToken') || "";
+    if (userJson.length === 0 || accessToken.length === 0) {
+      return false;
+    }
+
+    const user = JSON.parse(userJson) as User;
+
+    const userAccessToken = JSON.parse(
+      Buffer.from(
+        Buffer.from(accessToken, 'base64')
+          .toString('ascii')
+          .split('.')[1]
+          .replace(/-/g, '+')
+          .replace(/_/g, '/'),
+        'base64'
+      ).toString('ascii')
+    ) as TokenUser;
+
+    if (user.jti !== userAccessToken.jti) {
+      return false;
+    }
+
+    const expireDate = new Date((userAccessToken.exp ?? 0) * 1000);
+    if (new Date() > expireDate) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * 確認目前登入狀態
-   * @param verifyToken 是否呼叫 SSO API 驗證權杖
    * @returns 是否為登入狀態
    */
   public async checkAuthenticateState(): Promise<boolean> {
-    const now = new Date();
-    const accessToken = this.secureLocalStorageService.get("accessToken");
-    const authVerified = this.secureLocalStorageService.get("authVerified");
-    // 首先權杖當然要先存在
-    if (accessToken === null || accessToken.length === 0) {
+    const accessToken = this.secureLocalStorageService.get("accessToken") || "";
+    const user = this.secureLocalStorageService.get("user") || "";
+    if (accessToken.length === 0 || user.length === 0) {
       this.clearAuthenticateData();
       return false;
     }
 
-    // 再來檢查上次驗證的時間
-    if (
-      authVerified !== null &&
-      Math.abs(new Date(authVerified).getTime() - now.getTime()) <= environment.reverifyToken
-    ) {
-      this.tokenVerified = new Date(authVerified);
-      return true;
+    const userObj = JSON.parse(user) as TokenUser;
+    const expireDate = new Date((userObj.exp ?? 0) * 1000);
+    if (new Date() > expireDate) {
+      try {
+        return await this.reactiveAccessToken();
+      } catch (error) {
+        console.error(error);
+        this.clearAuthenticateData();
+        alert(error);
+        return false;
+      }
     }
 
-    // 如果權杖存在且經過驗證的時間還不是很久，直接返回已登入狀態
-    if (
-      accessToken.length > 0 &&
-      this.tokenVerified !== undefined
-    ) {
-      return true;
-    }
-
-    // 權杖上次檢查時間若為空或已經超時就去檢查權杖有效性
-    if (
-      this.tokenVerified === undefined ||
-      Math.abs(this.tokenVerified.getTime() - now.getTime()) > environment.reverifyToken
-    ) {
-      const url = `${environment.ssoApiUri}/api/v1/user`;
-      const header = { Authorization: `Bearer ${accessToken}` };
-      await lastValueFrom(
-          this.requestService.get<BaseResponse<User>>(url, undefined, header)
-        )
-        .then(() => {
-          this.secureLocalStorageService.set("authVerified", now.toISOString());
-          this.tokenVerified = now;
-        })
-        .catch(async () => await this.reactiveAccessToken())
-        .finally(() => {
-          if (this.tokenVerified === undefined) {
-            this.clearAuthenticateData();
-          }
-        });
-
-      return this.tokenVerified !== undefined;
-    }
-
-    return false;
+    return true;
   }
 
   /**
@@ -179,34 +185,73 @@ export class CommonService {
    * @returns 是否成功重新取得存取權杖
    */
   public async reactiveAccessToken(): Promise<boolean> {
-    const refreshToken = this.secureLocalStorageService.get("refreshToken");
-    if (refreshToken === null) {
-      return false;
+    const refreshToken = this.secureLocalStorageService.get("refreshToken") || "";
+    if (refreshToken.length === 0) {
+      throw new Error("重整權杖不存在");
     }
 
-    const url = `${environment.ssoApiUri}/api/v1/user/token/refresh`;
+    const payloadBase64 = Buffer
+      .from(refreshToken, 'base64')
+      .toString('ascii')
+      .split('.')[1]
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+    const payloadJson = Buffer.from(payloadBase64, 'base64').toString('ascii');
+    const payloads = JSON.parse(payloadJson) as RefreshTokenPayloads;
+    const expireDate = new Date((payloads.exp ?? 0) * 1000);
+    if (new Date() > expireDate) {
+      throw new Error("重整權杖已過期");
+    }
+
+    const uri = `${environment.ssoApiUri}/api/v1/user/token/refresh`;
     const header = { Authorization: `Bearer ${refreshToken}` };
-    await this.requestService.post<BaseResponse<SignInResponse>>(url, undefined, header)
+    return new Promise<boolean>((resolve, reject) => {
+      this.requestService.post<BaseResponse<SignInResponse>>(uri, undefined, undefined, header)
+        .subscribe({
+          next: response => {
+            this.secureLocalStorageService.set("accessToken", response.data.accessToken.token);
+            this.secureLocalStorageService.set("refreshToken", response.data.refreshToken.token);
+            const base64UriUser = Buffer.from(response.data.accessToken.token, 'base64')
+              .toString('ascii')
+              .split('.')[1]
+              .replace(/-/g, '+')
+              .replace(/_/g, '/');
+            const user = JSON.parse(Buffer.from(base64UriUser, 'base64').toString('ascii'));
+            this.setUserData(user);
+            resolve(true);
+          },
+          error: (errors: HttpErrorResponse) => {
+            if (errors.status >= 500) {
+              throw new Error("伺服器發生無法預期的錯誤，請重試一次");
+            }
+
+            if (errors.status >= 400 && errors.status < 500) {
+              this.clearAuthenticateData();
+              throw new Error("重新取得登入狀態失敗，請重新登入");
+            }
+
+            reject(false);
+          }
+        });
+      });
+  }
+
+  /**
+   * 取得使用者帳號資料
+   * @param userInToken 權杖中的使用者帳號資料
+   */
+  private setUserData(userInToken: TokenUser): void {
+    const uri = `${environment.ssoApiUri}/api/v1/user`;
+    this.requestService.get<BaseResponse<Account>>(uri)
       .subscribe({
         next: response => {
-          const now = new Date();
-          this.secureLocalStorageService.set("accessToken", response.data.accessToken.token);
-          this.secureLocalStorageService.set("refreshToken", response.data.refreshToken.token);
-          this.secureLocalStorageService.set("user", JSON.stringify(response.data.user));
-          this.tokenVerified = now;
+          const user = Object.assign(userInToken, response.data) as User;
+          this.secureLocalStorageService.set("user", JSON.stringify(user));
         },
         error: (errors: HttpErrorResponse) => {
-          if (errors.status >= 500) {
-            alert("伺服器發生無法預期的錯誤，請重試一次");
-          }
-
-          if (errors.status >= 400 && errors.status < 500) {
-            this.clearAuthenticateData();
-          }
+          this.requestService.requestFailedHandler(errors);
         }
       });
-
-    return this.tokenVerified === undefined;
   }
 
   /**
@@ -224,12 +269,23 @@ export class CommonService {
    * 登入相關資料
    * @returns 登入帳號相關資料
    */
-  public getUserData(): User | undefined {
-    let user = this.secureLocalStorageService.get("user");
-    if (user === null) {
+  public getUserData(): TokenUser | undefined {
+    // await this.checkAuthenticateState();
+
+    let user = this.secureLocalStorageService.get("user") || "";
+    if (user.length === 0) {
       return undefined;
     }
 
     return JSON.parse(user);
+  }
+
+  /**
+   * 複製物件
+   * @param original 原始物件
+   * @returns 複製的物件
+   */
+  public deepCloneObject(original: any): any {
+    return JSON.parse(JSON.stringify(original));
   }
 }

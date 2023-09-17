@@ -22,7 +22,7 @@
           <a
             title="請先登入"
             class="btn btn-success"
-            [class.disabled]="!checkAuthenticateState()"
+            [class.disabled]="!authenticated"
             [routerLink]="composeNewPostUrl()"
           >
             張貼文章
@@ -69,13 +69,13 @@
                 </a>
               </td>
               <td class="post-time">
-                {{ post.post_user }}<br />
+                {{ getUserNameById(post.post_user_id) }}<br />
                 {{ post.created_at | date: "yyyy-MM-dd hh:mm:ss" }}
               </td>
               <!-- 文章狀態只要是已被刪除就通通顯示為刪除 -->
               <td class="post-time last-operatime">
                 <span style="color: gray;" *ngIf="post.last_operation_at === null">目前尚無回覆</span>
-                {{ post.last_operation_at }}
+                {{ post.last_operation_at | date: "yyyy-MM-dd hh:mm:ss" }}
               </td>
               <!-- <td class="post-time last-operatime"><span style="color: gray;">文章已被刪除</span></td> -->
             </tr>

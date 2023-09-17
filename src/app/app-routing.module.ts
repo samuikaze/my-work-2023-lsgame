@@ -1,12 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './components/home/home.component';
-import { CheckAuthenticateGuard } from './guards/check-authenticate.guard';
+import { checkAuthenticateGuard } from './guards/check-authenticate.guard';
+// import { CheckAuthenticateGuard } from './guards/check-authenticate.guard';
 
 const routes: Routes = [
   {
     path: "",
-    canActivate: [CheckAuthenticateGuard],
+    canActivate: [checkAuthenticateGuard],
     children: [
       {
         path: "",

@@ -31,9 +31,9 @@
         </thead>
         <tbody>
           <tr *ngFor="let news of newsList">
-            <td>{{ news.type }}</td>
-            <td><a [routerLink]="composeNewsDetailUrl(news.id)" class="text-decoration-none">{{ news.title }}</a></td>
-            <td>{{ news.created_at | date: "yyyy-MM-dd HH:mm:ss" }}</td>
+            <td>{{ getNewsTypeById(news.newsTypeId) }}</td>
+            <td><a [routerLink]="composeNewsDetailUrl(news.newsId)" class="text-decoration-none">{{ news.newsTitle }}</a></td>
+            <td>{{ news.createdAt | date: "yyyy-MM-dd HH:mm:ss" }}</td>
           </tr>
         </tbody>
       </table>

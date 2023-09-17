@@ -1,16 +1,20 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Breadcrumb } from 'src/app/abstracts/common';
-import { Post, Reply, ReplyList } from 'src/app/abstracts/forums';
+import { Post, Reply, ReplyList } from 'src/app/components/forum/forums';
 import { BaseResponse } from 'src/app/abstracts/http-client';
-import { User } from 'src/app/abstracts/single-sign-on';
+import { TokenUser } from 'src/app/abstracts/single-sign-on';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
-import { environment } from 'src/environments/environment';
 import { ForumBoardListComponent } from '../forum-board-list/forum-board-list.component';
 import { ForumPostListComponent } from '../forum-post-list/forum-post-list.component';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ForumPostViewerStatus, Modals } from './forum-post-viewer';
+import { Modal } from 'bootstrap';
+import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Component({
     selector: 'app-forum-post-viewer',
@@ -22,6 +26,10 @@ import { NgIf, NgFor, DatePipe } from '@angular/common';
 })
 export class ForumPostViewerComponent implements OnInit {
 
+  public statuses: ForumPostViewerStatus = {
+    deleting: false,
+  };
+  private modals: Modals = {};
   public boardId: number;
   public postId: number;
   public post?: Post;
@@ -31,12 +39,15 @@ export class ForumPostViewerComponent implements OnInit {
   public page = 1;
   public totalPages = 0;
   public breadcrumb: Breadcrumb;
-  public userInfo?: User = undefined;
+  public userInfo?: TokenUser = undefined;
+  private selectedReplyId: number | undefined = 0;
   constructor(
     private route: ActivatedRoute,
     private commonService: CommonService,
     private requestService: RequestService,
     private breadcrumbService: BreadcrumbService,
+    private appEnvironmentService: AppEnvironmentService,
+    private router: Router,
     @Inject(ForumBoardListComponent) private forumBoardListComponent: ForumBoardListComponent,
     @Inject(ForumPostListComponent) private forumPostListComponent: ForumPostListComponent
   ) {
@@ -51,6 +62,14 @@ export class ForumPostViewerComponent implements OnInit {
     this.checkAuthenticateState();
     this.getPost();
     this.getReplies();
+    this.initialModals();
+  }
+
+  private initialModals(): void {
+    this.modals = {
+      confirmDeletePostModal: new Modal('#confirmDeletePostModal'),
+      confirmDeleteReplyModal: new Modal('#confirmDeleteReplyModal'),
+    };
   }
 
   /**
@@ -119,34 +138,48 @@ export class ForumPostViewerComponent implements OnInit {
   /**
    * 取得文章本體
    */
-  private getPost() {
+  private async getPost() {
     this.postLoaded = false;
     this.post = undefined;
 
-    const URL = `${environment.backendUri}/forums/boards/${this.boardId}/posts/${this.postId}`;
-    this.requestService.get<BaseResponse<Post>>(URL)
-      .subscribe(data => {
-        this.post = data.data;
-        this.postLoaded = true;
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
+    const uri = `${baseUri}/forums/boards/${this.boardId}/posts/${this.postId}`;
+    this.requestService.get<BaseResponse<Post>>(uri)
+      .subscribe({
+        next: response => {
+          this.post = response.data;
+          this.postLoaded = true;
+        },
+        error: (errors: HttpErrorResponse) => {
+          this.requestService.requestFailedHandler(errors);
+          this.postLoaded = true;
+        }
       });
   }
 
   /**
    * 取得文章底下的回應
    */
-  private getReplies() {
+  private async getReplies() {
     this.repliesLoaded = false;
     this.replies = [];
 
-    const URL = `${environment.backendUri}/forums/boards/${this.boardId}/posts/${this.postId}/replies`;
-    const PARAMS = {
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
+    const uri = `${baseUri}/forums/boards/${this.boardId}/posts/${this.postId}/replies`;
+    const params = {
       page: this.page
     };
-    this.requestService.get<BaseResponse<ReplyList>>(URL, PARAMS)
-      .subscribe(data => {
-        this.replies = data.data.replies;
-        this.totalPages = data.data.totalPages;
-        this.repliesLoaded = true;
+    this.requestService.get<BaseResponse<ReplyList>>(uri, params)
+      .subscribe({
+        next: response => {
+          this.replies = response.data.replies;
+          this.totalPages = response.data.totalPages;
+          this.repliesLoaded = true;
+        },
+        error: (errors: HttpErrorResponse) => {
+          this.requestService.requestFailedHandler(errors);
+          this.repliesLoaded = true;
+        }
       });
   }
 
@@ -154,14 +187,14 @@ export class ForumPostViewerComponent implements OnInit {
    * 確認登入狀態
    * @returns 確認登入狀態
    */
-  public checkAuthenticateState() {
+  public checkAuthenticateState(): boolean {
     if (this.userInfo !== undefined) {
       return true;
     }
 
     this.userInfo = this.commonService.getUserData();
 
-    return this.userInfo !== undefined;
+    return this.commonService.checkAuthenticateStateOffline();
   }
 
   /**
@@ -173,6 +206,88 @@ export class ForumPostViewerComponent implements OnInit {
       return false;
     }
 
-    return postUserId === this.userInfo.id;
+    return postUserId === this.userInfo.userId;
+  }
+
+  /**
+   * 檢查回應標題是否存在
+   * @param title 回應標題
+   * @returns 回應標題是否存在
+   */
+  public isReplyTitleExists(title: string | undefined) {
+    return title != null && title.length > 0;
+  }
+
+  /**
+   * 刪除文章
+   */
+  public async fireDeletePost(): Promise<void> {
+    this.statuses.deleting = true;
+
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
+    const uri = `${baseUri}/forums/boards/${this.boardId}/post/${this.postId}`;
+    this.requestService.delete<BaseResponse<null>>(uri)
+      .subscribe({
+        next: () => {
+          this.statuses.deleting = false;
+          this.operationModal('confirmDeletePostModal', 'close');
+          alert('刪除成功，頁面將跳轉回文章一覽');
+          this.router.navigate(['forums', this.boardId]);
+        },
+        error: (errors: HttpErrorResponse) => {
+          this.requestService.requestFailedHandler(errors);
+          this.statuses.deleting = false;
+        }
+      })
+  }
+
+  /**
+   * 刪除回應
+   */
+  public async fireDeleteReply(): Promise<void> {
+    if (this.selectedReplyId == undefined) {
+      return;
+    }
+
+    this.statuses.deleting = true;
+
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Forum);
+    const uri = `${baseUri}/forums/boards/${this.boardId}/post/${this.postId}/reply/${this.selectedReplyId}`;
+    this.requestService.delete<BaseResponse<null>>(uri)
+      .subscribe({
+        next: () => {
+          this.replies = this.replies.filter(reply => reply.id !== this.selectedReplyId);
+          this.selectedReplyId = undefined;
+          alert('刪除成功');
+          this.statuses.deleting = false;
+          this.operationModal('confirmDeleteReplyModal', 'close');
+        },
+        error: (errors: HttpErrorResponse) => {
+          this.requestService.requestFailedHandler(errors);
+          this.statuses.deleting = false;
+        }
+      })
+  }
+
+  public setSelectedReplyId(replyId: number): void {
+    this.selectedReplyId = replyId;
+  }
+
+  /**
+   * 操作指定 Modal
+   * @param modal 目標 Modal 名稱
+   * @param action 操作
+   */
+  public operationModal(modal: string, action: 'open' | 'close'): void {
+    if (this.modals[modal] !== undefined) {
+      switch (action) {
+        case 'open':
+          this.modals[modal].show();
+          break;
+        case 'close':
+          this.modals[modal].hide();
+          break;
+      }
+    }
   }
 }

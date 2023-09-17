@@ -88,15 +88,6 @@
         <a class="btn btn-primary" type="button" routerLink="/goods">繼續選購</a>
         <div *ngIf="checkAuthenticateState()" class="col-12 d-grid gap-2">
           <button type="button" class="btn btn-success" [disabled]="checkoutBtnDisabled()">立刻下單</button>
-          <hr />
-          <button
-            type="button"
-            class="btn btn-info"
-            (click)="saveCart()"
-            [disabled]="checkoutBtnDisabled()"
-          >
-            保存購物車
-          </button>
         </div>
         <hr />
         <button

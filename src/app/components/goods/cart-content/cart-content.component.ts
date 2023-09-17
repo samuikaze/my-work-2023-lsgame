@@ -1,16 +1,17 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { Breadcrumb } from 'src/app/abstracts/common';
-import { Cart, Good } from 'src/app/abstracts/goods';
-import { BaseResponse } from 'src/app/abstracts/http-client';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
 import { CartService } from 'src/app/services/cart-service/cart.service';
 import { CommonService } from 'src/app/services/common-service/common.service';
 import { RequestService } from 'src/app/services/request-service/request.service';
-import { environment } from 'src/environments/environment';
 import { GoodsListComponent } from '../goods-list/goods-list.component';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { NgIf, NgFor } from '@angular/common';
+import { Good } from '../good';
+import { Cart } from 'src/app/services/cart-service/cart-service';
+import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
+import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 
 @Component({
     selector: 'app-cart-content',
@@ -22,7 +23,7 @@ import { NgIf, NgFor } from '@angular/common';
 })
 export class CartContentComponent implements OnInit {
 
-  public goods: Cart[] = [];
+  public goods: Array<Cart> = [];
   public loaded: boolean = false;
   public breadcrumb: Breadcrumb = { title: "購物車", uri: "/goods/cart" };
   constructor(
@@ -30,6 +31,7 @@ export class CartContentComponent implements OnInit {
     private requestService: RequestService,
     private cartService: CartService,
     private breadcrumbService: BreadcrumbService,
+    private appEnvironmentService: AppEnvironmentService,
     @Inject(GoodsListComponent) private goodListComponent: GoodsListComponent
   ) { }
 
@@ -70,23 +72,17 @@ export class CartContentComponent implements OnInit {
   }
 
   /**
-   * 取得儲存的購物車
-   */
-  public getSavedCart(): void {
-    const url = `${environment.backendUri}/`
-  }
-
-  /**
    * 取得購物車詳細資訊
    */
-  public getCartGoodDetails(): void {
-    const CART_GOODS = this.cartService.getCart();
-    const BODY = { goods: CART_GOODS.map(good => good.id) };
+  public async getCartGoodDetails(): Promise<void> {
+    const cartGoods = this.cartService.getCart();
+    const body = { goods: cartGoods.map(good => good.id) };
 
-    const URL = `${environment.backendUri}/goods/cart`;
-    this.requestService.post<BaseResponse<Good[]>>(URL, BODY)
-      .subscribe(data => {
-        this.goods = this.processGoodsFormat(data.data, CART_GOODS);
+    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.Shop);
+    const uri = `${baseUri}/shop/goods`;
+    this.requestService.post<Array<Good>>(uri, body)
+      .subscribe(response => {
+        this.goods = this.processGoodsFormat(response, cartGoods);
         this.loaded = true;
       });
   }
@@ -106,13 +102,6 @@ export class CartContentComponent implements OnInit {
     this.cartService.resetCart();
 
     this.getCartGoodDetails();
-  }
-
-  /**
-   * 儲存購物車
-   */
-  public saveCart(): void {
-    this.cartService.saveCart();
   }
 
   /**
@@ -152,7 +141,7 @@ export class CartContentComponent implements OnInit {
    * @returns 完整商品網址
    */
   public composeGoodDetailUrl(id: number): string {
-    return `/goods/${id}`;
+    return `/shop/goods/${id}`;
   }
 
   /**
@@ -165,13 +154,13 @@ export class CartContentComponent implements OnInit {
     let carts: Cart[] = [];
 
     goods.forEach(good => {
-      const GOOD_CART = cart_goods.filter(cgood => cgood.id == good.id);
+      const GOOD_CART = cart_goods.filter(cgood => cgood.id == good.goodId);
 
       if (GOOD_CART.length > 0) {
         let cart: Cart = {
-          id: good.id,
+          id: good.goodId,
           name: good.name,
-          image: good.preview_image,
+          image: good.previewImagee,
           description: good.description,
           prices: GOOD_CART[0].prices,
           quantity: GOOD_CART[0].quantity,
@@ -184,7 +173,11 @@ export class CartContentComponent implements OnInit {
     return carts;
   }
 
+  /**
+   * 檢查登入狀態
+   * @returns 是否登入
+   */
   public checkAuthenticateState() {
-    return this.commonService.getUserData() !== undefined;
+    return this.commonService.checkAuthenticateStateOffline();
   }
 }
