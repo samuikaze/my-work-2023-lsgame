@@ -8,4 +8,4 @@ SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 sed -i "s/secretKey: \"\",/secretKey: \"$SECRET_KEY\",/g" "$SCRIPT_DIR/environment.prod.ts"
 
 # Move this file to correct path.
-mv $SCRIPT_DIR/environment.prod.ts $SCRIPT_DIR/../src/evnironments/environment.ts
+mv $SCRIPT_DIR/environment.prod.ts ${SCRIPT_DIR%/*}/../src/evnironments/environment.ts
