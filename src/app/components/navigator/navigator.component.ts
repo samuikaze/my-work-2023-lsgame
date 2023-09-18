@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { Breadcrumb } from 'src/app/abstracts/common';
 import { BaseResponse } from 'src/app/abstracts/http-client';
@@ -16,13 +16,15 @@ import { SecureLocalStorageService } from 'src/app/services/secure-local-storage
 import { Modal } from 'bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonService } from 'src/app/services/common-service/common.service';
-import { Modals, NavigatorStatuses, SignIn, SignUp } from './navigator';
+import { Modals, NavigatorStatuses, SelectedImage, SignIn, SignUp } from './navigator';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf, DatePipe, AsyncPipe } from '@angular/common';
 import { Buffer } from 'buffer';
 import { TokenType } from 'src/app/enums/token-type';
 import { AppEnvironmentService } from 'src/app/services/app-environment-service/app-environment.service';
 import { ApiServiceTypes } from 'src/app/enums/api-service-types';
+import { v4 as uuidv4 } from 'uuid';
+import { SingleFileUploadResponse } from 'src/app/abstracts/file-storage-service';
 
 @Component({
   selector: 'app-navigator',
@@ -32,6 +34,8 @@ import { ApiServiceTypes } from 'src/app/enums/api-service-types';
   imports: [NgFor, NgIf, RouterLink, FormsModule, DatePipe, AsyncPipe],
 })
 export class NavigatorComponent implements OnInit {
+  @ViewChild('virtualAvator')
+  public virtualAvator?: ElementRef;
   public statuses: NavigatorStatuses = {
     signInPWVisible: false,
     signUpPWVisible: false,
@@ -42,9 +46,10 @@ export class NavigatorComponent implements OnInit {
     logined: false,
     updatingUser: false,
   };
+  private fileStorageServiceUri: string = '';
   public breadcrumbs: Breadcrumb[] = [];
   public datetime: Date = new Date();
-  public user: TokenUser = {
+  public user: User = {
     userId: -1,
     account: '',
     roles: [],
@@ -59,6 +64,11 @@ export class NavigatorComponent implements OnInit {
   private modals: Modals = {};
   private clockId?: number = undefined;
   public adminPanelUri: string = '#';
+  private selectedImage: SelectedImage = {
+    dataurl: '',
+    filename: '',
+    size: 0
+  };
   @Input() public signIn: SignIn = {
     account: '',
     password: '',
@@ -85,15 +95,23 @@ export class NavigatorComponent implements OnInit {
     private appEnvironmentService: AppEnvironmentService
   ) {}
 
-  ngOnInit(): void {
-    this.router.events.subscribe((event) => {
+  async ngOnInit(): Promise<void> {
+    this.router.events.subscribe(async (event) => {
       if (event instanceof NavigationEnd) {
         this.getBreadcrumb();
+        await this.getFileStorageServiceUrl();
         this.getLoginStatus()
           .then(() => this.checkAuthenticateStatus())
           .then(() => (this.getAdminPanelUri().then(response => this.adminPanelUri = response)));
       }
     });
+  }
+
+  /**
+   * 取得檔案儲存服務網址
+   */
+  private async getFileStorageServiceUrl(): Promise<void> {
+    this.fileStorageServiceUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.FileStorageService);
   }
 
   /**
@@ -539,33 +557,44 @@ export class NavigatorComponent implements OnInit {
    * @param folder 資料夾名稱，僅有檔案儲存服務會有
    * @returns 完整網址
    */
-  public async getImageUrl(
-    type: 'fileStorage' | 'dataurl',
-    filename: string,
-    folder?: string
-  ): Promise<string> {
-    let url = '';
-    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.FileStorageService);
-    switch (type) {
-      case 'fileStorage':
-        url += `${baseUri}/`;
-        if (
-          folder !== undefined &&
-          folder !== null &&
-          typeof folder === 'string' &&
-          folder.length > 0
-        ) {
-          url += `${folder}/`;
-        }
-
-        url += `${filename}`;
-        break;
-      case 'dataurl':
-        url += filename;
-        break;
+  public getImageUrl(): string {
+    if (this.selectedImage.dataurl.length > 0) {
+      return this.selectedImage.dataurl;
     }
 
-    return url;
+    if (
+      this.user.virtualAvator != null &&
+      this.user.virtualAvator.length > 0 &&
+      this.fileStorageServiceUri.length > 0
+    ) {
+      return `${this.fileStorageServiceUri}/api/v1/file/${this.user.virtualAvator}`;
+    }
+
+    return 'assets/images/users/avators/example-avator.jpg';
+  }
+
+  /**
+   * 將選擇的圖片顯示到網頁上
+   * @param event 選擇檔案事件
+   */
+  public readImageUrl(event: Event): void {
+    if (event == null || event.target == null) {
+      return;
+    }
+
+    const target = (event.target as HTMLInputElement)
+    if (target.files && target.files[0]) {
+      const fileReader = new FileReader();
+      fileReader.onload = (e) => {
+        this.selectedImage.dataurl = (fileReader.result as string);
+        this.selectedImage.filename = file.name;
+        this.selectedImage.size = file.size;
+      }
+
+      const file = target.files[0];
+
+      fileReader.readAsDataURL(file);
+    }
   }
 
   /**
@@ -616,6 +645,53 @@ export class NavigatorComponent implements OnInit {
   }
 
   /**
+   * 上傳虛擬形象
+   * @returns 虛擬形象圖檔路徑
+   */
+  private async uploadVirtualAvator(): Promise<string|null> {
+    if (this.selectedImage.dataurl.length > 0) {
+      const array = this.selectedImage.dataurl.split(',');
+      const mimeMatch = array[0].match(/:(.*?);/);
+      if (mimeMatch == null) {
+        throw new Error('無法辨別圖檔的檔案類型');
+      }
+      const mime = mimeMatch[1];
+      const byteString = atob(array[1]);
+      let times = byteString.length;
+      let uint8Array = new Uint8Array(times);
+
+      while (times--) {
+        uint8Array[times] = byteString.charCodeAt(times);
+      }
+
+      console.log(uint8Array);
+      const virtualAvatorImage = new Blob([uint8Array], {type: mime});
+
+      let formData = new FormData();
+      formData.append('uploadId', uuidv4());
+      formData.append('filename', this.selectedImage.filename);
+      formData.append('file', virtualAvatorImage);
+
+      const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.FileStorageService);
+      const uri = `${baseUri}/api/v1/file/upload`;
+      return new Promise<string>((resolve, reject) => {
+        this.requestService.formDataPost<BaseResponse<SingleFileUploadResponse>>(uri, formData)
+          .subscribe({
+            next: response => {
+              resolve(response.data.path);
+            },
+            error: (errors: HttpErrorResponse) => {
+              this.requestService.requestFailedHandler(errors);
+              reject(errors);
+            }
+          });
+      });
+    }
+
+    return null;
+  }
+
+  /**
    * 更新使用者帳號資料
    */
   public async fireUpdateUser(): Promise<void> {
@@ -625,38 +701,62 @@ export class NavigatorComponent implements OnInit {
 
     this.statuses.updatingUser = true;
 
-    const password =
-      this.modifyUser.password != null && this.modifyUser.password.length > 0
-        ? this.modifyUser.password
-        : null;
-    const passwordConfirmation =
-      this.modifyUser.password_confirmation != null &&
-      this.modifyUser.password_confirmation.length > 0
-        ? this.modifyUser.password_confirmation
-        : null;
-    const body = {
-      _method: 'PATCH',
-      username: this.modifyUser.username,
-      email: this.modifyUser.email,
-      password: password,
-      passwordConfirmation: passwordConfirmation,
+    try {
+      const avatorPath = await this.uploadVirtualAvator();
+
+      const password =
+        this.modifyUser.password != null && this.modifyUser.password.length > 0
+          ? this.modifyUser.password
+          : null;
+      const passwordConfirmation =
+        this.modifyUser.password_confirmation != null &&
+        this.modifyUser.password_confirmation.length > 0
+          ? this.modifyUser.password_confirmation
+          : null;
+      const body = {
+        username: this.modifyUser.username,
+        email: this.modifyUser.email,
+        virtualAvator: avatorPath,
+        password: password,
+        passwordConfirmation: passwordConfirmation,
+      };
+
+      const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.SingleSignOn);
+      const uri = `${baseUri}/api/v1/user/update`;
+      this.requestService.patch<BaseResponse<UpdateUserResponse>>(uri, body)
+        .subscribe({
+          next: response => {
+            const user = Object.assign(this.user, response.data);
+            this.user = this.commonService.deepCloneObject(user);
+            this.modifyUser = this.commonService.deepCloneObject(user);
+            this.secureLocalStorageService.set("user", JSON.stringify(user));
+            this.clearSelectedImage();
+            alert('更新成功');
+            this.statuses.updatingUser = false;
+          },
+          error: (errors: HttpErrorResponse) => {
+            this.requestService.requestFailedHandler(errors);
+            this.statuses.updatingUser = false;
+          }
+        });
+    } catch (errors) {
+      alert("上傳虛擬形象圖檔發生錯誤，請確認圖檔是否過大，或是重整頁面後再試一次!");
+      this.statuses.updatingUser = false;
+    }
+  }
+
+  /**
+   * 清除選擇的圖檔
+   */
+  private clearSelectedImage(): void {
+    this.selectedImage = {
+      dataurl: '',
+      filename: '',
+      size: 0
     };
 
-    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.SingleSignOn);
-    const uri = `${baseUri}/api/v1/user/update`;
-    this.requestService.post<BaseResponse<UpdateUserResponse>>(uri, body)
-      .subscribe({
-        next: response => {
-          const user = Object.assign(this.user, response.data);
-          this.user = this.commonService.deepCloneObject(user);
-          this.modifyUser = this.commonService.deepCloneObject(user);
-          this.secureLocalStorageService.set("user", JSON.stringify(user));
-          this.statuses.updatingUser = false;
-        },
-        error: (errors: HttpErrorResponse) => {
-          this.requestService.requestFailedHandler(errors);
-          this.statuses.updatingUser = false;
-        }
-      });
+    if (this.virtualAvator != null) {
+      this.virtualAvator.nativeElement.value = null;
+    }
   }
 }

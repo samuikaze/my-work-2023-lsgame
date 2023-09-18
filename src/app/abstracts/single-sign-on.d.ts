@@ -33,13 +33,13 @@ export declare interface TokenUser {
   exp?: number;
   iat?: Date | null;
   iss?: string;
+  sub?: string;
   jti?: string;
   nbf?: number;
   userId?: number;
   account?: string;
   roles?: Array<Role>;
   scope?: Array<string>;
-  sub?: string;
   tokenType?: TokenType;
   username?: string;
 }
@@ -50,10 +50,11 @@ export declare interface Account {
   account?: string;
   email?: string;
   emailVerifiedAt?: Date;
+  virtualAvator?: string;
   roles?: Array<Role>;
-  created_at?: string;
-  updated_at?: string;
-  deleted_at?: string;
+  abilities?: Array<Ability>;
+  registerdAt?: Date;
+  updatedAt?: string;
 }
 
 export declare interface User extends TokenUser, Account {}

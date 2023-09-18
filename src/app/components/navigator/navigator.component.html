@@ -93,12 +93,7 @@
             </div>
             <div class="d-grid gap-2 d-md-flex justify-content-md-center">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-              <button
-                type="button"
-                class="btn btn-primary"
-                (click)="fireSignIn()"
-                [disabled]="statuses.logining"
-              >
+              <button type="button" class="btn btn-primary" (click)="fireSignIn()" [disabled]="statuses.logining">
                 <span class="spinner-border spinner-border-sm" aria-hidden="true" *ngIf="statuses.logining"></span>
                 {{ statuses.logining ? "登入中..." : "登入" }}
               </button>
@@ -196,23 +191,34 @@
         </div>
       </div>
       <div class="modal-body">
-        <div class="col-6">
-          <div class="mb-2">
-            <label for="static-username" class="col-form-label">使用者帳號</label>
-            <input type="text" readonly class="form-control-plaintext" id="static-username"
-              [value]="modifyUser.account">
+        <div class="row">
+          <div class="col-6">
+            <div class="mb-2">
+              <label for="static-username" class="col-form-label">使用者帳號</label>
+              <input type="text" readonly class="form-control-plaintext" id="static-username"
+                [value]="modifyUser.account">
+            </div>
+            <div class="mb-2">
+              <label for="static-roles" class="col-form-label">使用者權限</label>
+              <input type="text" readonly class="form-control-plaintext" id="static-roles" [value]="getRoles()">
+            </div>
           </div>
-          <div class="mb-2">
-            <label for="static-roles" class="col-form-label">使用者權限</label>
-            <input type="text" readonly class="form-control-plaintext" id="static-roles" [value]="getRoles()">
+          <div class="col-6">
+            <div class="mb-2">
+              <div class="mb-3">
+                <label for="virtual-image" class="form-label">虛擬形象</label><br />
+                <img [src]="getImageUrl()" class="virtual-avator-image img-thumbnail mt-0 mb-2" alt="虛擬形象" />
+                <input
+                  #virtualAvator
+                  class="form-control"
+                  type="file"
+                  accept="image/*"
+                  id="virtual-image"
+                  (change)="readImageUrl($event)"
+                />
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="col-6">
-          <!-- <div class="mb-2">
-            <label for="virtual-image" class="col-form-label">虛擬形象</label>
-            <img [src]="getImageUrl("fileStorage", user.)" alt="虛擬形象" />
-            <input type="file" id="">
-          </div> -->
         </div>
         <div class="mb-2">
           <label for="user-email" class="con-form-label">使用者名稱</label>
@@ -230,9 +236,20 @@
             [(ngModel)]="modifyUser.password_confirmation" />
         </div>
         <div class="mb-2">
-          <label for="user-email" class="con-form-label">電子郵件地址</label>
-          <input type="email" class="form-control" id="user-email" placeholder="請輸入電子郵件地址"
-            [(ngModel)]="modifyUser.email" aria-describedby="email-verified" />
+        <label for="user-email" class="con-form-label">電子郵件地址</label>
+          <div class="input-group">
+            <input
+              type="email"
+              class="form-control"
+              id="user-email"
+              placeholder="請輸入電子郵件地址"
+              aria-label="請輸入電子郵件地址"
+              aria-describedby="button-addon2"
+              [(ngModel)]="modifyUser.email"
+              aria-describedby="email-verified"
+            />
+            <button class="btn btn-outline-secondary disabled" type="button" id="button-addon2">驗證電子郵件地址</button>
+          </div>
           <div id="email-verified" class="form-text" [class]="{'text-success': isEmailVerified()}">
             <svg *ngIf="isEmailVerified()" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
               class="bi bi-check-circle" viewBox="0 0 16 16">
@@ -251,12 +268,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-        <button
-          type="button"
-          class="btn btn-primary"
-          [disabled]="!canFireUpdateUser()"
-          (click)="fireUpdateUser()"
-        >
+        <button type="button" class="btn btn-primary" [disabled]="!canFireUpdateUser()" (click)="fireUpdateUser()">
           <span class="spinner-border spinner-border-sm" aria-hidden="true" *ngIf="statuses.updatingUser"></span>
           {{ statuses.updatingUser ? '儲存中 ...' : '儲存' }}
         </button>

@@ -194,4 +194,22 @@ export class RequestService {
         params: PARAMS,
       });
   }
+
+  /**
+   * 以表單發起 POST 請求
+   * @param url 請求網址
+   * @param formData 表單資料
+   * @param param 新的查詢字串
+   * @param header 自訂標頭
+   * @returns RxJS 可觀察物件
+   */
+  public formDataPost<T>(url: string, formData: FormData, param?: BaseParams, header?: CustomerHeaders): Observable<T> {
+    this.setHeaders(header);
+    const params = this.setParams(param);
+
+    return this.http.post<T>(url, formData, {
+      headers: this.headers,
+      params: params,
+    });
+  }
 }

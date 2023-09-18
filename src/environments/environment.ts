@@ -8,7 +8,7 @@ export const environment = {
   shopUri: "http://localhost:12001",
   forumUri: "http://localhost:23231/api/v1",
   ssoApiUri: "http://localhost:19510",
-  fileStorageServiceUri: "https://localhost:15211/",
+  fileStorageServiceUri: "http://localhost:15210",
   secretKey: "JDJ5JDEwJE1DWDkvbC96RDdvVHljdklEMFY3OE9iLmNaRy4xYnFsSjNBZFdoVlM2aTQ4UjJXd1FhSDJt",
   backStage: "http://localhost:5200",
 };
