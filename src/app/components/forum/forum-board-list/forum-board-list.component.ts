@@ -20,6 +20,7 @@ import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 export class ForumBoardListComponent implements OnInit {
 
   private apiPath = "forums/boards";
+  private fileStorageServiceUri: string = '';
   public boards: Board[] = [];
   public loaded: boolean = false;
   public breadcrumb: Breadcrumb = { title: "討論專區", uri: "/forums" };
@@ -33,7 +34,15 @@ export class ForumBoardListComponent implements OnInit {
   ngOnInit(): void {
     this.commonService.setTitle("討論專區");
     this.breadcrumbService.setBreadcrumb(this.breadcrumb);
+    this.getFileStorageServiceUrl();
     this.getBoards();
+  }
+
+  /**
+   * 取得檔案儲存服務網址
+   */
+  private async getFileStorageServiceUrl(): Promise<void> {
+    this.fileStorageServiceUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.FileStorageService);
   }
 
   /**
@@ -58,7 +67,7 @@ export class ForumBoardListComponent implements OnInit {
    * @returns 完整圖片路徑
    */
   public composeImagePath(filename: string): string {
-    return `assets/images/forums/boards/${filename}`;
+    return `${this.fileStorageServiceUri}/api/v1/file/info/${filename}`;
   }
 
   /**

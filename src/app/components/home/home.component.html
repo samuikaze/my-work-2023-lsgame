@@ -61,14 +61,14 @@
     </div>
     <div class="col-6 mb-5">
       <h3 class="subheading-wthree">遊戲製作宗旨</h3>
-    <p class="paragraph-agileinfo">做為新創的遊戲團隊，我們為了向各位玩家呈上最有趣的內容，我們在製作上堅持：</p>
-    <ul>
+      <p class="paragraph-agileinfo">做為新創的遊戲團隊，我們為了向各位玩家呈上最有趣的內容，我們在製作上堅持：</p>
+      <ul>
         <li><i class="far fa-check-square"></i> 劇情完整及可讀性</li>
         <li><i class="far fa-check-square"></i> 美術衝擊性</li>
         <li><i class="far fa-check-square"></i> 遊戲可玩性</li>
         <li><i class="far fa-check-square"></i> 執行順暢性</li>
         <li><i class="far fa-check-square"></i> 隱藏要素</li>
-    </ul>
+      </ul>
     </div>
     <div class="col-12 mb-5">
       <h1 class="big-title">
@@ -87,7 +87,10 @@
             <td>{{ news.createdAt | date: "yyyy-MM-dd" }}</td>
             <td><span class="badge bg-primary">{{ getNewsTypeById(news.newsTypeId) }}</span></td>
             <td>
-              <a [routerLink]="getNewsLink(news.newsId)" class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">{{ news.newsTitle }}</a></td>
+              <a [routerLink]="getNewsLink(news.newsId)"
+                class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">{{
+                news.newsTitle }}</a>
+            </td>
           </tr>
         </tbody>
       </table>
