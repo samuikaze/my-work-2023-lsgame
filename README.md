@@ -55,3 +55,5 @@
 - [Angular App Fails to Build using GitHub Actions ('Cannot find module')](https://stackoverflow.com/a/66729595)
 - [Github Actions for NodeJS - 'Error: Cannot find module' for local file](https://stackoverflow.com/a/64359597)
 - [git mv and only change case of directory](https://stackoverflow.com/a/3011723)
+- [How to convert base64 dataUrl into image in typescript](https://stackoverflow.com/a/51881730)
+- [Angular - Clear File Input](https://stackoverflow.com/a/52325602)
