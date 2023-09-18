@@ -18,6 +18,7 @@ export class AppEnvironmentService {
     return new Promise<boolean>((resolve, reject) => {
       if (this.alreadyRetrieved) {
         resolve(true);
+        return;
       }
 
       this.requestService.get<any>('assets/configs.json').subscribe({
@@ -29,7 +30,9 @@ export class AppEnvironmentService {
         error: (errors: HttpErrorResponse) => {
           this.configFromJson = {};
 
-          if (errors.status !== 404) {
+          if (errors.status === 404) {
+            this.alreadyRetrieved = true;
+          } else {
             console.error(errors);
 
             reject(errors.message);
