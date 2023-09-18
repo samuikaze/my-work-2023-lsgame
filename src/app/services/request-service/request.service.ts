@@ -33,9 +33,11 @@ export class RequestService {
 
     const protocol = `${location.protocol}//`
     const hostname = location.host;
-    const currentPath = location.pathname.replace(this.router.url, '');
+    const currentPath = (this.router.url === '/') ? location.pathname : location.pathname.replace(this.router.url, '');
     const path = (currentPath.slice(-1) === '/') ? currentPath : `${currentPath}/`;
     const uri = (originalUri.indexOf('/') === 0) ? originalUri.substring(1) : originalUri;
+
+    console.log(`${protocol}${hostname}${path}${uri}`);
 
     return `${protocol}${hostname}${path}${uri}`;
   }
