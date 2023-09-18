@@ -1,8 +1,9 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { BaseParams, CustomerHeaders, RequestBody } from 'src/app/abstracts/http-client';
 import { SecureLocalStorageService } from '../secure-local-storage/secure-local-storage.service';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +13,7 @@ export class RequestService {
   private headers: HttpHeaders = new HttpHeaders();
   constructor(
     private http: HttpClient,
+    private router: Router,
     private secureLocalStorageService: SecureLocalStorageService
   ) { }
 
@@ -31,7 +33,8 @@ export class RequestService {
 
     const protocol = `${location.protocol}//`
     const hostname = location.host;
-    const path = location.pathname;
+    const currentPath = location.pathname.replace(this.router.url, '');
+    const path = (currentPath.slice(-1) === '/') ? currentPath : `${currentPath}/`;
     const uri = (originalUri.indexOf('/') === 0) ? originalUri.substring(1) : originalUri;
 
     return `${protocol}${hostname}${path}${uri}`;
