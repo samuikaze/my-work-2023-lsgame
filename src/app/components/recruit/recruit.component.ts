@@ -18,7 +18,7 @@ export class RecruitComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.commonService.setTitle("關於團隊");
+    this.commonService.setTitle("加入我們");
     this.breadcrumbService.setBreadcrumb(this.breadcrumb);
   }
 
