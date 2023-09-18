@@ -27,3 +27,9 @@ export declare interface SignUp {
   password_confirmation: string;
   username: string;
 }
+
+export declare interface SelectedImage {
+  dataurl: string;
+  filename: string;
+  size: number;
+}

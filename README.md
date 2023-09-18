@@ -20,6 +20,10 @@
 - npm
 - 任意瀏覽器
 
+## 線上展示
+
+- [點此檢視線上展示](https://syskzworks.ddns.net/forwork/lsgames/)
+
 ## 本機除錯
 
 可以遵循以下步驟在本機進行除錯或檢視
@@ -48,3 +52,6 @@
 - [APP_INITIALIZER](https://angular.io/api/core/APP_INITIALIZER)
 - [How to Load Data Before Your Angular App Starts](https://javascript.plainenglish.io/how-to-load-data-before-your-angular-app-starts-71083cf56132)
 - [Access object key using variable in typescript](https://stackoverflow.com/a/41994659)
+- [Angular App Fails to Build using GitHub Actions ('Cannot find module')](https://stackoverflow.com/a/66729595)
+- [Github Actions for NodeJS - 'Error: Cannot find module' for local file](https://stackoverflow.com/a/64359597)
+- [git mv and only change case of directory](https://stackoverflow.com/a/3011723)
