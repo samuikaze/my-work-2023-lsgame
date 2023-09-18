@@ -8,6 +8,7 @@ import { RequestService } from '../request-service/request.service';
 })
 export class AppEnvironmentService {
   private configFromJson?: any = undefined;
+  private alreadyRetrieved: boolean = false;
   constructor(private requestService: RequestService) {}
 
   /**
@@ -15,9 +16,14 @@ export class AppEnvironmentService {
    */
   public retrievingConfigsFromJson(): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
+      if (this.alreadyRetrieved) {
+        resolve(true);
+      }
+
       this.requestService.get<any>('assets/configs.json').subscribe({
         next: (response) => {
           this.configFromJson = response;
+          this.alreadyRetrieved = true;
           resolve(true);
         },
         error: (errors: HttpErrorResponse) => {
