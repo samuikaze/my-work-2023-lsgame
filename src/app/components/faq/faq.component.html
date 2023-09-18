@@ -1,1 +1,39 @@
-<p>faq works!</p>
+<div class="row p-3 mb-3">
+  <!-- 尚未準備完成 -->
+  <div class="col-12" *ngIf="statuses.gettingFaq">
+    <div class="card">
+      <div class="card-header fw-bold h4">系統訊息</div>
+      <div class="card-body text-center h3">
+        <span class="spinner-grow spinner-grow" role="status" aria-hidden="true"></span>&nbsp;
+        <span class="card-title fw-bold h2">取得常見問題一覽中 ...</span>
+      </div>
+    </div>
+  </div>
+  <!-- 準備完成，無資料 -->
+  <div class="col-122" *ngIf="faqs.length === 0">
+    <div class="col-12" *ngIf="!statuses.gettingFaq && faqs.length === 0">
+      <div class="card">
+        <div class="card-header fw-bold h4">系統訊息</div>
+        <div class="card-body">
+          <h5 class="card-title text-center fw-bold h2">此頁目前沒有可以顯示的常見問題</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 準備完成，有資料 -->
+  <div class="col-12" *ngIf="!statuses.gettingFaq && faqs.length > 0">
+    <div class="card mb-3" *ngFor="let faq of faqs">
+      <div class="card-header">
+        {{ faq.faqQuestion }}
+      </div>
+      <div class="card-body">
+        <p class="card-text">
+          {{ faq.faqAnswer }}
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 text-center mt-3">
+    <button type="button" class="btn btn-dark" (click)="navigateToContact()">找不到問題的解答嗎？</button>
+  </div>
+</div>
