@@ -8,6 +8,8 @@ import {
   SignInResponse,
   User,
   UpdateUserResponse,
+  Token,
+  SystemAccessTokenRequest,
 } from 'src/app/abstracts/single-sign-on';
 import { TokenUser } from 'src/app/abstracts/single-sign-on';
 import { BreadcrumbService } from 'src/app/services/breadcrumb-service/breadcrumb.service';
@@ -63,7 +65,6 @@ export class NavigatorComponent implements OnInit {
   public signUpError: string = '';
   private modals: Modals = {};
   private clockId?: number = undefined;
-  public adminPanelUri: string = '#';
   private selectedImage: SelectedImage = {
     dataurl: '',
     filename: '',
@@ -101,8 +102,7 @@ export class NavigatorComponent implements OnInit {
         this.getBreadcrumb();
         await this.getFileStorageServiceUrl();
         this.getLoginStatus()
-          .then(() => this.checkAuthenticateStatus())
-          .then(() => (this.getAdminPanelUri().then(response => this.adminPanelUri = response)));
+          .then(() => this.checkAuthenticateStatus());
       }
     });
   }
@@ -530,27 +530,6 @@ export class NavigatorComponent implements OnInit {
   }
 
   /**
-   * 取得後台管理網址
-   * @returns 後台管理網址
-   */
-  public async getAdminPanelUri(): Promise<string> {
-    const accessToken = this.secureLocalStorageService.get('accessToken');
-    const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.BackStage);
-
-    if (accessToken != null) {
-      const data = this.secureLocalStorageService.encrypt(accessToken);
-      const token = Buffer.from(data)
-        .toString('base64')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_');
-
-      return `${baseUri}/?token=${token}`;
-    }
-
-    return '';
-  }
-
-  /**
    * 取得圖片完整網址
    * @param type 類型
    * @param filename 檔案名稱
@@ -758,5 +737,33 @@ export class NavigatorComponent implements OnInit {
     if (this.virtualAvator != null) {
       this.virtualAvator.nativeElement.value = null;
     }
+  }
+
+  /**
+   * 跳轉到後臺頁面
+   */
+  public navigateToBackStage(): void {
+    this.appEnvironmentService.getConfig(ApiServiceTypes.SingleSignOn)
+      .then(baseUri => {
+        const uri = `${baseUri}/api/v1/system/token`;
+        const body: SystemAccessTokenRequest = {
+          system: "LSGamesFrontend - Backstage",
+          accessToken: this.secureLocalStorageService.get('accessToken') ?? '',
+          refreshToken: this.secureLocalStorageService.get('refreshToken') ?? ''
+        };
+        this.requestService.post<BaseResponse<Token>>(uri, body)
+          .subscribe({
+            next: async response => {
+              const backStageUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.BackStage);
+              const base64Uri = response.data.token
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_');
+              location.href = `${backStageUri}/?token=${base64Uri}`;
+            },
+            error: (errors: HttpErrorResponse) => {
+              this.requestService.requestFailedHandler(errors);
+            },
+          });
+      });
   }
 }
