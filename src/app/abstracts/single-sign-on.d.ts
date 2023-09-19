@@ -19,7 +19,7 @@ export declare interface SignInResponse {
 }
 
 export declare interface Token {
-  type: string;
+  tokenType: string;
   token: string;
 }
 
@@ -86,4 +86,10 @@ export declare interface UpdateUserResponse {
   email: string;
   username: string;
   emailVerifiedAt?: Date;
+}
+
+export declare interface SystemAccessTokenRequest {
+  system: string;
+  accessToken: string;
+  refreshToken: string;
 }
