@@ -344,8 +344,8 @@ export class NavigatorComponent implements OnInit {
     this.requestService.get<BaseResponse<Account>>(uri).subscribe({
       next: (response) => {
         const user = Object.assign(userInToken, response.data) as User;
-        this.user = user;
-        this.modifyUser = user;
+        this.user = this.commonService.deepCloneObject(user);
+        this.modifyUser = this.commonService.deepCloneObject(user);
         this.secureLocalStorageService.set('user', JSON.stringify(user));
       },
       error: (errors: HttpErrorResponse) => {
@@ -614,11 +614,12 @@ export class NavigatorComponent implements OnInit {
 
     const passwordCondition =
       this.modifyUser.password == null ||
+      this.modifyUser.password.length == 0 ||
       (this.modifyUser.password != null &&
         this.modifyUser.password.length > 0 &&
         this.modifyUser.password_confirmation != null &&
         this.modifyUser.password_confirmation.length > 0 &&
-        this.modifyUser.password === this.modifyUser.password_confirmation);
+        this.modifyUser.password == this.modifyUser.password_confirmation);
 
     return baseCondition && passwordCondition;
   }
@@ -708,10 +709,12 @@ export class NavigatorComponent implements OnInit {
             const user = Object.assign(this.user, response.data);
             this.user = this.commonService.deepCloneObject(user);
             this.modifyUser = this.commonService.deepCloneObject(user);
+            this.modifyUser.password = '';
+            this.modifyUser.password_confirmation = '';
             this.secureLocalStorageService.set("user", JSON.stringify(user));
             this.clearSelectedImage();
-            alert('更新成功');
             this.statuses.updatingUser = false;
+            alert('更新成功');
           },
           error: (errors: HttpErrorResponse) => {
             this.requestService.requestFailedHandler(errors);
