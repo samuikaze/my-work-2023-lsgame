@@ -697,7 +697,7 @@ export class NavigatorComponent implements OnInit {
         email: this.modifyUser.email,
         virtualAvator: avatorPath,
         password: password,
-        passwordConfirmation: passwordConfirmation,
+        password_confirmation: passwordConfirmation,
       };
 
       const baseUri = await this.appEnvironmentService.getConfig(ApiServiceTypes.SingleSignOn);
