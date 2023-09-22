@@ -21,6 +21,7 @@ import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 })
 export class GoodsListComponent implements OnInit {
 
+  public fssUrl?: string = '';
   public goods: Array<Good> = [];
   public cartPrice: number = 0;
   public cartQuantity: number = 0;
@@ -34,9 +35,10 @@ export class GoodsListComponent implements OnInit {
     private appEnvironmentService: AppEnvironmentService
   ) { }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.commonService.setTitle("周邊商品");
     this.breadcrumbService.setBreadcrumb(this.breadcrumb);
+    this.fssUrl = await this.appEnvironmentService.getConfig(ApiServiceTypes.FileStorageService);
     this.getCart();
     this.getGoods();
   }
@@ -102,6 +104,6 @@ export class GoodsListComponent implements OnInit {
    * @returns 商品預覽圖網址
    */
   public composePreviewImageUrl(image: string): string {
-    return `assets/images/goods/${image}`;
+    return `${this.fssUrl}/api/v1/file/${image}`;
   }
 }

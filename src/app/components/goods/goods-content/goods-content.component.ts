@@ -23,6 +23,7 @@ import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 })
 export class GoodsContentComponent implements OnInit {
 
+  public fssUrl?: string = '';
   private apiPath = "";
   public goodId?: number;
   public good?: Good;
@@ -40,9 +41,9 @@ export class GoodsContentComponent implements OnInit {
     @Inject(GoodsListComponent) private goodListComponent: GoodsListComponent
   ) { }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.getGoodId();
-    this.composeApiPath();
+    await this.composeApiPath();
     this.preprocessBreadcrumb();
     this.getCart();
     this.getGood();
@@ -105,12 +106,13 @@ export class GoodsContentComponent implements OnInit {
   /**
    * 處理 API 路徑
    */
-   private composeApiPath(): void {
+   private async composeApiPath(): Promise<void> {
     if (this.goodId === null) {
       throw new Error("消息 ID 不符合系統規定");
     }
 
     this.apiPath = `shop/goods/${this.goodId}`;
+    this.fssUrl = await this.appEnvironmentService.getConfig(ApiServiceTypes.FileStorageService);
   }
 
   /**
@@ -119,7 +121,7 @@ export class GoodsContentComponent implements OnInit {
    * @returns 圖片路徑
    */
   public composeGoodImagePath(filename: string): string {
-    return `assets/images/goods/${filename}`;
+    return `${this.fssUrl}/api/v1/file/${filename}`;
   }
 
   /**
