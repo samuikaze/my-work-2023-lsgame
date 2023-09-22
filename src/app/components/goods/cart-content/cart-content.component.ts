@@ -23,6 +23,7 @@ import { ApiServiceTypes } from 'src/app/enums/api-service-types';
 })
 export class CartContentComponent implements OnInit {
 
+  public fssUrl?: string = '';
   public goods: Array<Cart> = [];
   public loaded: boolean = false;
   public breadcrumb: Breadcrumb = { title: "購物車", uri: "/goods/cart" };
@@ -35,7 +36,8 @@ export class CartContentComponent implements OnInit {
     @Inject(GoodsListComponent) private goodListComponent: GoodsListComponent
   ) { }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    this.fssUrl = await this.appEnvironmentService.getConfig(ApiServiceTypes.FileStorageService);
     this.getCartGoodDetails();
     this.preprocessBreadcrumb();
   }
@@ -129,7 +131,7 @@ export class CartContentComponent implements OnInit {
    */
   public composeImagePath(image?: string): string {
     if (image !== undefined) {
-      return `assets/images/goods/${image}`;
+      return `${this.fssUrl}/api/v1/file/${image}`;
     }
 
     return '';
