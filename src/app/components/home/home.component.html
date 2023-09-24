@@ -1,32 +1,52 @@
 <div class="container-fluid">
   <div class="row">
-    <div class="col-12 mb-5">
-      <div id="carouselExample" class="carousel slide">
+    <div class="col-12 mb-5" *ngIf="carouselList.length > 0">
+      <div id="carousels" class="carousel slide">
         <div class="carousel-inner">
-          <div class="carousel-item active">
-            <img src="assets/images/carousel/carousel-1.jpg" class="d-block w-100" alt="carousel-1">
-            <div class="carousel-caption d-none d-md-block">
-              <h5>輪播一</h5>
-            </div>
-          </div>
-          <div class="carousel-item active">
-            <img src="assets/images/carousel/carousel-2.jpg" class="d-block w-100" alt="carousel-2">
-            <div class="carousel-caption d-none d-md-block">
-              <h5>輪播二</h5>
-            </div>
-          </div>
-          <div class="carousel-item active">
-            <img src="assets/images/carousel/carousel-3.jpg" class="d-block w-100" alt="carousel-3">
-            <div class="carousel-caption d-none d-md-block">
-              <h5>輪播三</h5>
-            </div>
+          <div
+            class="carousel-item"
+            [class]="{ active: i === 0 }"
+            *ngFor="let carousel of carouselList; index as i"
+          >
+            <ng-template [ngIf]="isCarouselLinkExists(carousel.link)">
+              <a [href]="carousel.link" target="_blank">
+                <img
+                  [src]="composeCarouselImageUrl(carousel.carouselImagePath)"
+                  class="d-block w-100"
+                  [alt]="carousel.description"
+                />
+                <div class="carousel-caption d-none d-md-block">
+                  <h5 *ngIf="isCarouselTitleExists(carousel.carouselTitle)">
+                    {{ carousel.carouselTitle }}
+                  </h5>
+                  <p>
+                    {{ carousel.description }}
+                  </p>
+                </div>
+              </a>
+            </ng-template>
+            <ng-template [ngIf]="!isCarouselLinkExists(carousel.link)">
+              <img
+                [src]="composeCarouselImageUrl(carousel.carouselImagePath)"
+                class="d-block w-100"
+                [alt]="carousel.description"
+              />
+              <div class="carousel-caption d-none d-md-block">
+                <h5 *ngIf="isCarouselTitleExists(carousel.carouselTitle)">
+                  {{ carousel.carouselTitle }}
+                </h5>
+                <p>
+                  {{ carousel.description }}
+                </p>
+              </div>
+            </ng-template>
           </div>
         </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+        <button class="carousel-control-prev" type="button" data-bs-target="#carousels" data-bs-slide="prev">
           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Previous</span>
         </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+        <button class="carousel-control-next" type="button" data-bs-target="#carousels" data-bs-slide="next">
           <span class="carousel-control-next-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Next</span>
         </button>
